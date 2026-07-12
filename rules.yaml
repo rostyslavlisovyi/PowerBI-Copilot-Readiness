@@ -190,7 +190,7 @@ rules:
     automatable: true
     detect: description exists BUT first 200 chars merely repeat the object name
     fix: rewrite description so the first sentence carries the business meaning
-    verify: first 200 chars differ from the name AND convey purpose (soft check: length + not name-equal)
+    verify: "first 200 chars differ from the name AND convey purpose (soft check: length + not name-equal)"
 
   - id: PBI-045
     requirement: Data categories set where relevant
