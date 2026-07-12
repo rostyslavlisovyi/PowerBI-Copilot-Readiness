@@ -173,24 +173,48 @@ rules:
     verify: all visible columns in table have non-empty description
 
   - id: PBI-031
-    requirement: Every visible measure has a description
+    requirement: Every visible measure has a Copilot-ready description
     source_id: MS-COP-03
     phase: iteration
     severity: critical
-    automatable: true
-    detect: measure.isHidden == false AND (measure.description empty OR length < 10)
-    fix: measure_operations.Update (batch) -> description (explain DAX logic in business terms)
-    verify: all visible measures on table have non-empty description
+    scope: measure
+    context_source: docs/context/business-glossary.md
+    detect:
+      visible: "measure.isHidden == false"
+      empty_check: 'measure.description.trim() == \"\" OR length < 10'
+      read_via: "measure_operations.List / Get"
+    branches:
+      - id: A_missing
+        when: 'description empty (\"\") or length < 10'
+        automatable: true
+        fix: "measure_operations.Update -> description"
+        rule: "Write from business-glossary.md (use provided context if the measure exists there). Never invent context. Structure: business summary first (<=200 chars: usage, disambiguation, units), then Business Logic, then Usage."
+      - id: B_bloated
+        when: 'description present but > 200 significant chars OR starts with boilerplate (\"Description\", quotes)'
+        automatable: true
+        fix: "measure_operations.Update -> description"
+        rule: "Compress to <=200 significant chars. Keep only business meaning per Microsoft guidance (preferred usage, disambiguation, units). Drop boilerplate headers and name repetition. Detailed sections may follow but must not push business meaning out of the first 200 chars."
+      - id: C_conflict
+        when: "measure name and description describe contradictory things"
+        automatable: false
+        flag_only: true
+        fix: none
+        action: "Do NOT edit. Append a row to docs/manual/name-description-conflicts.md with: measure name, current name, current description, nature of contradiction. Continue to next measure."
+    verify:
+      A_B: "description not empty AND length >= 10 AND first 200 chars carry business meaning (not name-equal, no boilerplate prefix)"
+      C: "conflict recorded in docs/manual/name-description-conflicts.md; model unchanged for this measure"
 
   - id: PBI-042
-    requirement: Key info sits within first 200 chars of description
+    requirement: Key info sits within the first 200 chars of the description
     source_id: MS-COP-03
+    reference: "microsoft/skills-for-fabric semantic-model-ai-readiness (front-load; do not restate name)"
     phase: iteration
     severity: critical
+    scope: [table, column, measure]
     automatable: true
-    detect: description exists BUT first 200 chars merely repeat the object name
-    fix: rewrite description so the first sentence carries the business meaning
-    verify: "first 200 chars differ from the name AND convey purpose (soft check: length + not name-equal)"
+    detect: 'first 200 chars start with boilerplate (\"Description\", quotes) OR merely repeat the object name OR contain no usage/disambiguation/units'
+    fix: "rewrite so the first sentence (<=200 chars) carries business meaning: preferred usage, disambiguation vs similar fields, expected grain, units"
+    verify: "first 200 chars differ from the name AND convey purpose AND contain no boilerplate prefix"
 
   - id: PBI-045
     requirement: Data categories set where relevant
