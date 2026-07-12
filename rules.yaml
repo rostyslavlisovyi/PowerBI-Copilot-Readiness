@@ -1,0 +1,331 @@
+# ============================================================
+# Power BI Copilot Readiness — Executable Rule Set
+# Machine-readable companion to docs/microsoft/requirements_matrix.md
+# Consumed by the agent defined in .github/copilot-instructions.md
+# ============================================================
+
+version: "1.0"
+project: PowerBI-Copilot-Readiness
+source_matrix: docs/microsoft/requirements_matrix.md
+source_references: docs/microsoft/references.md
+
+# ------------------------------------------------------------
+# GLOBAL CONFIG
+# ------------------------------------------------------------
+config:
+  unit: table                      # the atomic unit of processing is ONE table
+
+  ordering:
+    strategy: simplicity           # easiest tables first (prove mechanics on small)
+    ascending: true
+    weight_formula: "(columns + measures) + (2 * detect_failures) + (5 * relationship_count)"
+    tie_breaker: table_name_alpha
+
+  transactions:
+    wrap_all_writes: true
+    scope: per_table
+    options:
+      useTransaction: true
+      continueOnError: false
+    on_verify_fail: rollback
+
+  gate:
+    type: await_review             # STOP after each table, wait for approval
+    when: after_each_table_commit
+    resume_source: docs/runs/{model}/queue.md
+    statuses: [pending, in_progress, awaiting_review, approved, rejected]
+
+  governance:
+    data_privacy: metadata_only
+    forbid_dax_returning_row_data: true   # never query client / PII / financial rows
+    rls: out_of_scope              # RLS intentionally excluded from this ruleset
+
+# ------------------------------------------------------------
+# RELATIONSHIP INVARIANT
+# Relationships are NEVER edited. They are captured, guarded, and re-verified.
+# ------------------------------------------------------------
+relationship_invariant:
+  policy: protect_never_edit
+  lock_file: docs/runs/{model}/relationships.lock
+  fingerprint:
+    - from_table
+    - from_column
+    - to_table
+    - to_column
+    - cardinality
+    - cross_filter_direction
+    - is_active
+  capture:
+    phase: assessment
+    when: after_full_audit
+    read_via: relationship_operations.List
+  guard:
+    phase: iteration
+    step: verify
+    action: re-read relationships touching current table; compare to lock_file
+    on_mismatch: [rollback_transaction, set_status=blocked, escalate]
+  final_check:
+    phase: finalization
+    action: re-read ALL relationships; compare entire set to lock_file
+    on_mismatch: fail_model
+
+# ------------------------------------------------------------
+# PHASES
+# ------------------------------------------------------------
+phases:
+
+  assessment:                      # ONE-TIME, read-only
+    steps:
+      - connect                            # connection_operations
+      - backup: database_operations.ExportTMDL   # baseline snapshot -> commit
+      - full_audit                         # run all detect rules across whole model
+      - capture_relationships_lock         # write relationships.lock
+      - build_queue                        # ordered table list by simplicity
+    outputs:
+      - docs/runs/{model}/assessment.md    # full state matrix (as-is)
+      - docs/runs/{model}/relationships.lock
+      - docs/runs/{model}/queue.md
+    halt_after: true                       # stop; no changes yet
+
+  iteration:                       # REPEATS, one table per pass
+    unit: table
+    steps:
+      - pick_next_pending                  # first pending table in queue.md
+      - audit_table                        # detect rules scoped to this table
+      - plan                               # object -> field -> new value -> PBI-* -> Source_ID
+      - begin_transaction                  # transaction_operations.Begin
+      - apply_fixes                        # automatable rules only, batched
+      - verify_rules                       # re-check every touched PBI-*
+      - verify_relationship_guard          # relationship_invariant.guard
+      - commit_or_rollback
+      - snapshot_diff: database_operations.ExportTMDL   # commit; git diff = record
+      - set_status: awaiting_review
+      - STOP                               # gate: wait for approval before next table
+
+  finalization:                    # ONE-TIME, when queue is empty
+    steps:
+      - full_relationship_integrity_check  # relationship_invariant.final_check
+      - emit_manual_lane_report            # verified answers / AI instructions / etc.
+      - final_report: docs/runs/{model}/summary.md
+
+# ------------------------------------------------------------
+# RULES
+# Each rule: detect -> fix -> verify. automatable=false => manual_action.
+# ------------------------------------------------------------
+rules:
+
+  # ---- Prerequisites (assessment, human/admin) ----
+  - id: PBI-001..005
+    requirement: Copilot/tenant/capacity prerequisites
+    source_id: MS-FAB-02, MS-FAB-03, MS-COP-03
+    phase: assessment
+    automatable: false
+    detect: environment checks (tenant Copilot on, capacity region, paid SKU, Q&A on)
+    manual_action: confirm with admin before model rollout
+
+  # ---- Structural (assessment, detect only) ----
+  - id: PBI-010
+    requirement: Star schema design is used
+    source_id: MS-MODEL-01
+    phase: assessment
+    severity: critical
+    automatable: false
+    detect: model has clear fact/dimension separation; no snowflake sprawl
+    manual_action: flag structural refactors for human decision
+
+  - id: PBI-015
+    requirement: No ambiguous / disconnected relationship traps
+    source_id: MS-COP-04
+    phase: assessment
+    severity: recommended
+    automatable: false
+    detect: relationship_operations.List -> check for inactive ambiguity, disconnected field-param traps
+    manual_action: report only (relationships are never auto-edited)
+
+  - id: PBI-016
+    requirement: Unused objects removed
+    source_id: MS-COP-04
+    phase: assessment
+    severity: recommended
+    automatable: false
+    detect: objects with no references
+    manual_action: propose deletions; never auto-delete (least-change rule)
+
+  # ---- Per-table metadata (iteration, automatable) ----
+  - id: PBI-040
+    requirement: Table has a description
+    source_id: MS-COP-03
+    phase: iteration
+    severity: critical
+    automatable: true
+    detect: table.description is empty OR length < 10
+    fix: table_operations.Update -> description (business-first, key info in first 200 chars)
+    verify: table.description not empty AND length >= 10
+
+  - id: PBI-041
+    requirement: Columns have descriptions
+    source_id: MS-COP-03
+    phase: iteration
+    severity: recommended
+    automatable: true
+    detect: column.isHidden == false AND (column.description empty OR length < 10)
+    fix: column_operations.Update (batch) -> description
+    verify: all visible columns in table have non-empty description
+
+  - id: PBI-031
+    requirement: Every visible measure has a description
+    source_id: MS-COP-03
+    phase: iteration
+    severity: critical
+    automatable: true
+    detect: measure.isHidden == false AND (measure.description empty OR length < 10)
+    fix: measure_operations.Update (batch) -> description (explain DAX logic in business terms)
+    verify: all visible measures on table have non-empty description
+
+  - id: PBI-042
+    requirement: Key info sits within first 200 chars of description
+    source_id: MS-COP-03
+    phase: iteration
+    severity: critical
+    automatable: true
+    detect: description exists BUT first 200 chars merely repeat the object name
+    fix: rewrite description so the first sentence carries the business meaning
+    verify: first 200 chars differ from the name AND convey purpose (soft check: length + not name-equal)
+
+  - id: PBI-045
+    requirement: Data categories set where relevant
+    source_id: MS-MODEL-13
+    phase: iteration
+    severity: nice-to-have
+    automatable: true
+    detect: geo/URL/image-like columns with dataCategory unset
+    fix: column_operations.Update -> dataCategory
+    verify: targeted columns have dataCategory set
+
+  # ---- Per-table naming (iteration, automatable, RELATIONSHIP-SENSITIVE) ----
+  - id: PBI-020
+    requirement: Human-readable table name (no "table" suffix)
+    source_id: MS-COP-02
+    phase: iteration
+    severity: critical
+    automatable: true
+    relationship_guard: true
+    detect: table name has technical suffix / prefix / underscores
+    fix: table_operations.Rename
+    verify: name human-readable AND relationship guard passes
+
+  - id: PBI-021
+    requirement: Measure names reflect calculation & purpose
+    source_id: MS-COP-03
+    phase: iteration
+    severity: critical
+    automatable: true
+    detect: measure name is cryptic / abbreviated
+    fix: measure_operations.Rename
+    verify: name descriptive; dependent measures still resolve
+
+  - id: PBI-022
+    requirement: Column names unambiguous; avoid raw IDs/codes
+    source_id: MS-COP-03
+    phase: iteration
+    severity: critical
+    automatable: true
+    relationship_guard: true          # renaming key columns can touch relationships
+    detect: column name is raw id/code/cryptic
+    fix: column_operations.Rename (engine updates relationship refs automatically)
+    verify: name readable AND relationship guard confirms links intact
+
+  - id: PBI-023
+    requirement: No duplicate field names across tables
+    source_id: MS-COP-01
+    phase: assessment            # detected globally...
+    apply_phase: iteration       # ...resolved per-table
+    severity: critical
+    automatable: true
+    relationship_guard: true
+    detect: same field name appears in multiple tables (global scan)
+    fix: column_operations.Rename to disambiguate
+    verify: no cross-table name collisions remain
+
+  # ---- Per-table hide technical fields (iteration, automatable) ----
+  - id: PBI-060
+    requirement: Technical relationship keys / raw IDs hidden
+    source_id: MS-COP-04
+    phase: iteration
+    severity: critical
+    automatable: true
+    relationship_guard: true          # hiding must NOT break the relationship
+    detect: key/id columns with isHidden == false
+    fix: column_operations.Update -> isHidden = true
+    verify: column hidden AND relationship still active (hidden columns still join)
+
+  - id: PBI-061
+    requirement: Sort-order helper fields hidden
+    source_id: MS-COP-04
+    phase: iteration
+    severity: recommended
+    automatable: true
+    detect: sort-by helper columns visible
+    fix: column_operations.Update -> isHidden = true
+    verify: helper columns hidden; sortByColumn binding intact
+
+  - id: PBI-062
+    requirement: Intermediate calculation measures hidden
+    source_id: MS-COP-02
+    phase: iteration
+    severity: recommended
+    automatable: true
+    detect: helper/intermediate measures visible
+    fix: measure_operations.Update -> isHidden = true
+    verify: intermediate measures hidden; dependent measures still resolve
+
+  # ---- Manual lane (finalization, NOT MCP) ----
+  - id: PBI-070
+    requirement: AI data schema (Simplify) defined
+    source_id: MS-PREP-02
+    phase: finalization
+    automatable: false
+    manual_action: agent produces list of fields to include/exclude for Copilot -> docs/manual/
+
+  - id: PBI-071
+    requirement: Verified answers for common questions
+    source_id: MS-PREP-03
+    phase: finalization
+    automatable: false
+    manual_action: agent drafts trigger phrases (5-7) + intended answers -> docs/manual/
+
+  - id: PBI-072
+    requirement: AI instructions (business context, terminology, synonyms-as-terms)
+    source_id: MS-PREP-04
+    phase: finalization
+    automatable: false
+    note: synonyms are handled HERE (MCP exposes no synonym write)
+    manual_action: agent drafts AI-instructions text -> docs/manual/
+
+  - id: PBI-074
+    requirement: Model marked "Approved for Copilot"
+    source_id: MS-COP-04
+    phase: finalization
+    automatable: false
+    manual_action: human confirms in Power BI Service after all tables approved
+
+  - id: PBI-080..082
+    requirement: Copilot testing + HCAAT review
+    source_id: MS-PREP-01
+    phase: finalization
+    automatable: false
+    manual_action: agent supplies test question set + expected answers -> docs/manual/
+
+# ------------------------------------------------------------
+# EXCLUSIONS
+# ------------------------------------------------------------
+excluded:
+  - id: PBI-065
+    requirement: RLS roles
+    reason: intentionally out of scope for this ruleset
+  - id: PBI-013, PBI-014
+    requirement: Relationship create/update
+    reason: relationships are an invariant, never edited (see relationship_invariant)
+  - id: PBI-050, PBI-051
+    requirement: Synonyms / Perspectives
+    reason: no MCP synonym write; synonyms folded into PBI-072 (AI instructions)
