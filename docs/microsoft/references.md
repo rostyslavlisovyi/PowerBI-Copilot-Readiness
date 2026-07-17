@@ -194,3 +194,35 @@ Mapped source: `MS-FAB-03`.
 - Power BI Desktop users require Admin, Member, or Contributor access to a compatible workspace.
 - Power BI Desktop requires the tenant-level Copilot setting to be enabled.
 - Sovereign cloud environments are not currently supported.
+
+## MS-MODEL-01 — Understand star schema and the importance for Power BI
+
+**URL**
+
+https://learn.microsoft.com/power-bi/guidance/star-schema
+
+### Verified findings
+
+- Microsoft recommends designing Power BI semantic models using a star schema.
+- Semantic models should separate fact tables from dimension tables.
+- Fact and dimension data should not be combined in the same table.
+- Fact tables should maintain a consistent grain.
+- Relationships should follow the star schema pattern by relating dimension tables to fact tables through one-to-many relationships.
+
+### Evidence classification
+
+Recommended
+
+## MS-MODEL-02 — Use Copilot with semantic models
+
+**URL**
+
+https://learn.microsoft.com/power-bi/create-reports/copilot-semantic-models
+
+### Verified findings
+
+- Following semantic model best practices, including star schema design, improves the quality of Copilot responses.
+
+### Evidence classification
+
+Recommended

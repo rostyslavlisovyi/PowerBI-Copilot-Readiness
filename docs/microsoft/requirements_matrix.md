@@ -30,18 +30,15 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 
 ## Modeling and Schema
 
-| ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
-|---|---|---|---|---|---|---|---|
-| PBI-010 | Star schema design is used | Modeling | MS-MODEL-01 | Recommended | 🔴 | Pending | Foundation for reliable model behavior; confirm whether Copilot guidance states this directly |
-| PBI-011 | Fact tables are clearly delineated | Modeling | MS-COP-03 | Recommended | 🔴 | Pending | |
-| PBI-012 | Dimension tables hold descriptive attributes | Modeling | MS-COP-03 | Recommended | 🔴 | Pending | |
-| PBI-013 | Relationships are defined with correct cardinality | Relationships | MS-COP-03 | Direct | 🔴 | Pending | `1:*`, `*:1`, and `*:*` relationships are explicit |
-| PBI-014 | Active and inactive relationships are configured correctly | Relationships | MS-MODEL-03 | Recommended | 🟡 | Pending | Role-playing dimensions are inactive where required |
-| PBI-015 | The model contains no ambiguous relationships or disconnected field-parameter traps | Modeling | MS-COP-04 | Derived | 🟡 | Pending | Explain the supporting Microsoft guidance during source review |
-| PBI-016 | Unused model objects are removed | Modeling | MS-COP-04 | Recommended | 🟡 | Pending | Includes unused tables, fields, and measures |
-| PBI-017 | Hierarchies are established for common drill-down paths | Modeling | MS-COP-03 | Recommended | 🟢 | Pending | Example: Year > Quarter > Month |
-| PBI-018 | Column data types are correct and consistent | Modeling | MS-COP-03 | Recommended | 🟡 | Pending | |
-| PBI-019 | Values within columns use standardized casing and terminology | Modeling | MS-COP-03 | Recommended | 🟢 | Pending | Example: Open, Closed, Pending |
+### Modeling and Schema
+
+| ID | Requirement | Evidence | Source |
+|----|-------------|----------|--------|
+| PBI-010 | Design semantic models using a star schema. | Recommended | MS-MODEL-01 |
+| PBI-011 | Separate fact and dimension tables. | Recommended | MS-MODEL-01 |
+| PBI-012 | Do not mix fact and dimension data within the same table. | Recommended | MS-MODEL-01 |
+| PBI-013 | Maintain a consistent grain within each fact table. | Recommended | MS-MODEL-01 |
+| PBI-014 | Configure one-to-many relationships from dimension tables to fact tables. | Recommended | MS-MODEL-01 |
 
 ## Naming
 
