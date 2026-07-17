@@ -26,7 +26,7 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 | PBI-006 | Intended users have access to the workspace and item required for the Copilot experience | Prerequisites | MS-FAB-02 | Direct | 🔴 | Pending | Existing Power BI permissions continue to control accessible data and items |
 | PBI-007 | Power BI Desktop users have Admin, Member, or Contributor access to at least one Copilot-compatible workspace | Prerequisites | MS-FAB-03 | Direct | 🟡 | Pending | Applies only when Copilot is used in Power BI Desktop |
 | PBI-008 | The capacity is not a trial capacity or trial SKU | Prerequisites | MS-FAB-03 | Direct | 🔴 | Pending | Only paid supported capacities qualify |
-| PBI-009 | The deployment does not rely on an unsupported sovereign cloud environment | Prerequisites | MS-COP-03 | Direct | 🔴 | Pending | Current Microsoft documentation states that sovereign clouds are not supported |
+| PBI-009 | The deployment does not rely on an unsupported sovereign cloud environment | Prerequisites | MS-FAB-03 | Direct | 🔴 | Pending | Current Microsoft documentation states that sovereign clouds are not supported |
 
 ## Modeling and Schema
 
@@ -122,13 +122,9 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 | PBI-084 | Prep Data for AI changes are retested after publication to the Power BI service | Testing | MS-PREP-01, MS-PREP-02 | Recommended | 🟡 | Pending | Changes can take time before affecting Copilot results |
 | PBI-085 | Model integrity is verified after renames or structural changes | Testing | MS-MODEL-03 | Derived | 🔴 | Pending | Check relationships, RLS, field parameters, and dependent objects; source verification remains pending |
 
-## Rollup
-
-Fill this table during the model review.
-
 | Category | Total | Met | Pending | Blocked |
 |---|---:|---:|---:|---:|
-| Prerequisites | 5 | 0 | 5 | 0 |
+| Prerequisites | 9 | 0 | 9 | 0 |
 | Modeling and Schema | 10 | 0 | 10 | 0 |
 | Naming | 4 | 0 | 4 | 0 |
 | Measures | 3 | 0 | 3 | 0 |
@@ -136,11 +132,9 @@ Fill this table during the model review.
 | Discoverability | 2 | 0 | 2 | 0 |
 | Hidden and Technical Fields | 3 | 0 | 3 | 0 |
 | Security | 1 | 0 | 1 | 0 |
-| AI Preparation | 13 | 0 | 13 | 0 |
+| AI Preparation | 14 | 0 | 14 | 0 |
 | Testing and Validation | 6 | 0 | 6 | 0 |
-| Prerequisites | 8 | 0 | 8 | 0 |
-| Prerequisites | 9 | 0 | 9 | 0 |
-| **Total** | **57** | **0** | **57** | **0** |
+| **Total** | **58** | **0** | **58** | **0** |
 
 ## Evidence Rollup
 
@@ -148,12 +142,11 @@ Update this table after the source-review process.
 
 | Evidence Level | Total | Verified | Pending Verification |
 |---|---:|---:|---:|
-| Direct | 20 | 0 | 20 |
-| Derived | 7 | 0 | 7 |
-| Recommended | 16 | 0 | 16 |
+| Direct | 30 | 0 | 30 |
+| Derived | 6 | 0 | 6 |
+| Recommended | 21 | 0 | 21 |
 | Project | 1 | 0 | 1 |
-
-| **Total classified requirements** | **44** | **0** | **44** |
+| **Total classified requirements** | **58** | **0** | **58** |
 
 > The evidence rollup counts `PBI-071a` and `PBI-072a` as independent requirements. Recalculate the totals whenever requirements or classifications change.
 
