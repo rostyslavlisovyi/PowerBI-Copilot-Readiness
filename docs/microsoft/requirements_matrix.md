@@ -18,14 +18,15 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 
 | ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
 |---|---|---|---|---|---|---|---|
-| PBI-001 | Copilot is enabled at the tenant level by a Fabric administrator | Prerequisites | MS-FAB-02 | Direct | 🔴 | Pending | Required before Copilot features become available |
-| PBI-002 | The semantic model is hosted in a supported Fabric capacity | Prerequisites | MS-FAB-03 | Direct | 🔴 | Pending | Verify supported SKU |
-| PBI-003 | The Fabric capacity is located in a region where Copilot is supported | Prerequisites | MS-FAB-03 | Direct | 🔴 | Pending | Verify regional availability |
-| PBI-004 | Cross-region Azure OpenAI processing is enabled when required | Prerequisites | MS-FAB-02 | Direct | 🔴 | Pending | Required for some tenant configurations |
-| PBI-005 | Power BI Q&A is enabled before configuring Prep Data for AI features | Prerequisites | MS-PREP-02, MS-PREP-03 | Direct | 🔴 | Pending | Required for AI data schema and verified answers |
-| PBI-006 | The user has permission to create or edit AI preparation artifacts | Prerequisites | MS-PREP-01 | Direct | 🟡 | Pending | Author permissions are required |
-| PBI-007 | The semantic model is stored in a supported workspace | Prerequisites | MS-FAB-03 | Direct | 🔴 | Pending | Unsupported workspaces cannot use Copilot |
-| PBI-008 | The semantic model is refreshable and accessible | Prerequisites | MS-COP-03 | Derived | 🟡 | Pending | Copilot depends on an accessible semantic model |
+| PBI-001 | Copilot access is enabled through the `Users can use Copilot and other features powered by Azure OpenAI` setting | Prerequisites | MS-FAB-02 | Direct | 🔴 | Pending | Verify the effective tenant or delegated capacity configuration for the target experience |
+| PBI-002 | The workspace uses a paid Fabric capacity of F2 or higher or a Power BI Premium capacity of P1 or higher | Prerequisites | MS-FAB-03 | Direct | 🔴 | Pending | Trial capacities, trial SKUs, Pro-only workspaces, and PPU-only workspaces do not directly satisfy the standard capacity requirement |
+| PBI-003 | The capacity is located in a region supported for Copilot | Prerequisites | MS-FAB-03 | Direct | 🔴 | Pending | Validate against the current Microsoft Fabric region availability documentation |
+| PBI-004 | Cross-region Azure OpenAI processing is enabled when the capacity region requires it | Prerequisites | MS-FAB-02 | Direct | 🔴 | Pending | Conditional requirement; do not mark as required when Azure OpenAI processing is available within the applicable boundary |
+| PBI-005 | The target report or semantic model is stored in a workspace assigned to a Copilot-enabled supported capacity | Prerequisites | MS-FAB-02, MS-FAB-03 | Direct | 🔴 | Pending | Copilot-enabled items must be associated with a supported workspace and capacity |
+| PBI-006 | Intended users have access to the workspace and item required for the Copilot experience | Prerequisites | MS-FAB-02 | Direct | 🔴 | Pending | Existing Power BI permissions continue to control accessible data and items |
+| PBI-007 | Power BI Desktop users have Admin, Member, or Contributor access to at least one Copilot-compatible workspace | Prerequisites | MS-FAB-03 | Direct | 🟡 | Pending | Applies only when Copilot is used in Power BI Desktop |
+| PBI-008 | The capacity is not a trial capacity or trial SKU | Prerequisites | MS-FAB-03 | Direct | 🔴 | Pending | Only paid supported capacities qualify |
+| PBI-009 | The deployment does not rely on an unsupported sovereign cloud environment | Prerequisites | MS-COP-03 | Direct | 🔴 | Pending | Current Microsoft documentation states that sovereign clouds are not supported |
 
 ## Modeling and Schema
 
@@ -95,6 +96,7 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 
 | ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
 |---|---|---|---|---|---|---|---|
+| PBI-069 | Power BI Q&A is enabled before configuring AI data schema or verified answers | AI Preparation | MS-PREP-02, MS-PREP-03 | Direct | 🔴 | Pending | Required by the Prep Data for AI features that depend on Q&A |
 | PBI-070 | An AI data schema is defined and limited to fields relevant to Copilot questions | AI Preparation | MS-PREP-02 | Direct | 🔴 | Pending | A focused schema reduces ambiguity; model relationships continue to be respected |
 | PBI-070a | Hidden, technical, confusing, and irrelevant fields are excluded from the AI data schema | AI Preparation | MS-PREP-02 | Recommended | 🟡 | Pending | Prioritize clean columns with limited ambiguity |
 | PBI-071 | Verified answers are created for common, important, or nuanced business questions | AI Preparation | MS-PREP-03 | Recommended | 🟡 | Pending | Verified answers are stored in the semantic model |
@@ -137,7 +139,8 @@ Fill this table during the model review.
 | AI Preparation | 13 | 0 | 13 | 0 |
 | Testing and Validation | 6 | 0 | 6 | 0 |
 | Prerequisites | 8 | 0 | 8 | 0 |
-| **Total** | **56** | **0** | **56** | **0** |
+| Prerequisites | 9 | 0 | 9 | 0 |
+| **Total** | **57** | **0** | **57** | **0** |
 
 ## Evidence Rollup
 
@@ -149,6 +152,7 @@ Update this table after the source-review process.
 | Derived | 7 | 0 | 7 |
 | Recommended | 16 | 0 | 16 |
 | Project | 1 | 0 | 1 |
+
 | **Total classified requirements** | **44** | **0** | **44** |
 
 > The evidence rollup counts `PBI-071a` and `PBI-072a` as independent requirements. Recalculate the totals whenever requirements or classifications change.

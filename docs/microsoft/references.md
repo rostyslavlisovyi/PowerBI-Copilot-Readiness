@@ -158,3 +158,38 @@ Mapped source: `MS-FAB-02`.
 - Unsupported capacities or regions prevent Copilot usage regardless of model quality.
 
 Mapped source: `MS-FAB-03`.
+
+## MS-FAB-02 — Enable and configure Copilot in Microsoft Fabric
+
+- **Title:** Enable and configure Copilot in Microsoft Fabric
+- **Publisher:** Microsoft Learn
+- **Status:** Verified
+- **Evidence Level:** Direct
+- **Last Reviewed:** 2026-07-17
+- **Purpose:** Tenant settings, delegated capacity configuration, workspace assignment, and user access requirements.
+
+### Verified findings
+
+- Copilot access is controlled through the `Users can use Copilot and other features powered by Azure OpenAI` setting.
+- Copilot settings can be scoped to selected security groups.
+- Delegated tenant settings can be configured at the capacity level.
+- Workspaces containing Copilot-enabled items must be assigned to a supported capacity.
+- Users must be granted access to the relevant workspace.
+- Cross-region Azure OpenAI processing is conditional and depends on the applicable geographic and compliance boundary.
+
+## MS-FAB-03 — Enable Fabric Copilot for Power BI
+
+- **Title:** Enable Fabric Copilot for Power BI
+- **Publisher:** Microsoft Learn
+- **Status:** Verified
+- **Evidence Level:** Direct
+- **Last Reviewed:** 2026-07-17
+- **Purpose:** Power BI-specific capacity, licensing, region, workspace, and Desktop access requirements.
+
+### Verified findings
+
+- Standard Copilot use requires a paid Fabric capacity of F2 or higher or Power BI Premium capacity of P1 or higher.
+- Trial SKUs and trial capacities are not supported.
+- The capacity must be located in a supported region.
+- Power BI Desktop users require Admin, Member, or Contributor access to a compatible workspace.
+- Power BI Desktop requires the tenant-level Copilot setting to be enabled.
