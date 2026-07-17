@@ -1,73 +1,80 @@
 # Microsoft References
 
-> Official Microsoft documentation used as the primary source for the Power BI Copilot Readiness project.
-
----
+> Official Microsoft documentation used to derive and validate Power BI Copilot Readiness requirements.
 
 ## Purpose
 
-This document catalogs Microsoft documentation used during the development of the Copilot Readiness Checklist.
-Only official Microsoft sources are listed here.
-Each source has a stable Source_ID referenced by requirements_matrix.md.
+This file is the source registry for the project.
 
----
+Every `Source_ID` used in `requirements_matrix.md` must reference an entry in this document.
 
-## Microsoft Learn — Copilot for Power BI
+Source identifiers must remain stable even when Microsoft changes a document title or URL.
 
-| Source_ID | Topic | URL | Status |
-|---|---|---|---|
-| MS-COP-01 | Copilot for Power BI (overview) | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-introduction | ✅ |
-| MS-COP-02 | Use Copilot with semantic models | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-semantic-models | ✅ |
-| MS-COP-03 | Optimize your semantic model for Copilot | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-evaluate-data | ✅ |
-| MS-COP-04 | Tutorial: Prepare a semantic model for AI | https://learn.microsoft.com/en-us/power-bi/create-reports/tutorial-copilot-power-bi-prepare-model | ✅ |
-| MS-COP-05 | Best practices: asking questions & getting answers | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-questions-answers | ⚠️ |
-
-## Microsoft Learn — Prep data for AI
-
-| Source_ID | Topic | URL | Status |
-|---|---|---|---|
-| MS-PREP-01 | Prepare your data for AI (hub) | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai | ✅ |
-| MS-PREP-02 | AI data schemas (Simplify data schema) | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai-data-schema | ✅ |
-| MS-PREP-03 | Verified answers | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai-verified-answers | ✅ |
-| MS-PREP-04 | AI instructions | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai-instructions | ✅ |
-| MS-PREP-05 | Prep data for AI — FAQ | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai-faq | ✅ |
-
-## Microsoft Learn — Modeling & DAX foundations
-
-| Source_ID | Topic | URL | Status |
-|---|---|---|---|
-| MS-MODEL-01 | Star schema / data modeling guidance | https://learn.microsoft.com/en-us/power-bi/guidance/star-schema | ✅ |
-| MS-MODEL-03 | Create & manage relationships | https://learn.microsoft.com/en-us/power-bi/transform-model/desktop-create-and-manage-relationships | ✅ |
-| MS-MODEL-04 | Model relationships overview | https://learn.microsoft.com/en-us/power-bi/transform-model/desktop-relationships-understand | ✅ |
-| MS-MODEL-05 | Create measures | https://learn.microsoft.com/en-us/power-bi/transform-model/desktop-measures | ✅ |
-| MS-MODEL-06 | DAX best practices | https://learn.microsoft.com/en-us/dax/best-practices/dax-best-practices-overview | ✅ |
-| MS-MODEL-07 | Optimization guide | https://learn.microsoft.com/en-us/power-bi/guidance/power-bi-optimization | ✅ |
-| MS-MODEL-08 | Model view / descriptions | https://learn.microsoft.com/en-us/power-bi/transform-model/desktop-modeling-view | ⚠️ |
-| MS-MODEL-09 | Calculation groups | https://learn.microsoft.com/en-us/analysis-services/tabular-models/calculation-groups | ✅ |
-| MS-MODEL-10 | Time intelligence functions | https://learn.microsoft.com/en-us/dax/time-intelligence-functions-dax | ✅ |
-| MS-MODEL-13 | Data categorization | https://learn.microsoft.com/en-us/power-bi/transform-model/desktop-data-categorization | ✅ |
-
-## Microsoft Fabric
-
-| Source_ID | Topic | URL | Status |
-|---|---|---|---|
-| MS-FAB-01 | Copilot in Fabric (overview) | https://learn.microsoft.com/en-us/fabric/get-started/copilot-fabric-overview | ✅ |
-| MS-FAB-02 | Copilot tenant settings | https://learn.microsoft.com/en-us/fabric/admin/service-admin-portal-copilot | ✅ |
-| MS-FAB-03 | Fabric region availability | https://learn.microsoft.com/en-us/fabric/admin/region-availability | ✅ |
-| MS-FAB-04 | Copilot capacity consumption | https://learn.microsoft.com/en-us/fabric/fundamentals/copilot-fabric-consumption | ⚠️ |
-
----
-
-## Status legend
+## Source Status
 
 | Status | Meaning |
 |---|---|
-| ✅ | Verified |
-| ⚠️ | Exists but confirm exact URL on open |
+| `Planned` | Source has been identified but not reviewed |
+| `Reviewed` | Source has been reviewed, but requirements are not fully verified |
+| `Verified` | Relevant requirements have been traced to the source |
+| `Deprecated` | Source is outdated or replaced and should not be used for new requirements |
 
----
+## Evidence Classification
 
-## Notes
+| Evidence Level | Meaning |
+|---|---|
+| `Direct` | Microsoft explicitly states the requirement or prerequisite |
+| `Derived` | The requirement is inferred from one or more Microsoft sources |
+| `Recommended` | Microsoft presents the item as guidance or a best practice rather than a mandatory Copilot requirement |
+| `Project` | The requirement is defined by this project based on implementation experience |
 
-This document is a reference index only. Requirements are in requirements_matrix.md and link back via Source_ID.
-Synonyms and Perspectives were removed: no dedicated Copilot page exists. Synonym behavior is covered through AI instructions (see MS-PREP-04).
+## Evidence Usage Rules
+
+- `Direct` requirements should normally be treated as mandatory unless the source explicitly limits their scope.
+- `Derived` requirements must include an explanation in the `Notes` column.
+- `Recommended` requirements can be excluded from an MVP readiness assessment when time or scope is limited.
+- `Project` requirements must not be presented as official Microsoft requirements.
+- Every requirement except a purely project-specific requirement must have a valid `Source_ID`.
+- A requirement can have only one primary `Evidence Level`.
+- Additional context can be documented in `review_notes.md`.
+
+## Source Registry
+
+| Source_ID | Document | Area | URL | Version | Last Reviewed | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| MS-COP-01 | Semantic model naming guidance | Copilot | TBD | Current online documentation | TBD | Planned | Naming and field disambiguation guidance |
+| MS-COP-02 | Organize semantic models for Copilot | Copilot | TBD | Current online documentation | TBD | Planned | Model organization, naming, and hidden objects |
+| MS-COP-03 | Optimize semantic models for Copilot | Copilot | TBD | Current online documentation | TBD | Planned | Primary Copilot semantic-model guidance |
+| MS-COP-04 | Prepare semantic models for AI and Copilot | Copilot | TBD | Current online documentation | TBD | Planned | Model cleanup, AI preparation, approval, and validation |
+| MS-PREP-01 | Prep data for AI overview | Prep Data for AI | TBD | Current online documentation | TBD | Planned | Entry point for AI preparation features |
+| MS-PREP-02 | Define an AI data schema | Prep Data for AI | TBD | Current online documentation | TBD | Planned | AI schema scope and object selection |
+| MS-PREP-03 | Create verified answers | Prep Data for AI | TBD | Current online documentation | TBD | Planned | Verified answers and trigger phrases |
+| MS-PREP-04 | Configure AI instructions | Prep Data for AI | TBD | Current online documentation | TBD | Planned | Business context and response instructions |
+| MS-PREP-05 | AI instructions best practices | Prep Data for AI | TBD | Current online documentation | TBD | Planned | Preparation order, terminology, and fine-tuning guidance |
+| MS-MODEL-01 | Understand star schema and its relevance to Power BI | Modeling | TBD | Current online documentation | TBD | Planned | Star-schema design guidance |
+| MS-MODEL-03 | Model relationships in Power BI Desktop | Modeling | TBD | Current online documentation | TBD | Planned | Cardinality, active relationships, and model integrity |
+| MS-MODEL-09 | Calculation groups | Modeling | TBD | Current online documentation | TBD | Planned | Calculation-group behavior and metadata |
+| MS-MODEL-11 | Q&A synonyms | Modeling | TBD | Current online documentation | TBD | Planned | Verify direct applicability to Copilot |
+| MS-MODEL-12 | Perspectives | Modeling | TBD | Current online documentation | TBD | Planned | Verify direct applicability to Copilot |
+| MS-MODEL-13 | Data categories in Power BI Desktop | Modeling | TBD | Current online documentation | TBD | Planned | Data-category metadata |
+| MS-FAB-02 | Copilot tenant settings | Fabric Administration | TBD | Current online documentation | TBD | Planned | Tenant settings and cross-region processing |
+| MS-FAB-03 | Copilot regional availability and capacity requirements | Fabric Administration | TBD | Current online documentation | TBD | Planned | Capacity, SKU, and regional availability |
+
+## Review Process
+
+For every source:
+
+1. Add the official Microsoft Learn URL.
+2. Record the date on which the source was reviewed.
+3. Identify the requirements supported by the source.
+4. Confirm whether each requirement is `Direct`, `Derived`, or `Recommended`.
+5. Add findings and ambiguities to `review_notes.md`.
+6. Change the source status to `Verified` only after all mapped requirements have been checked.
+
+## Maintenance Rules
+
+- Review verified sources after significant Microsoft Fabric or Power BI Copilot announcements.
+- Do not change an existing `Source_ID` when only the title or URL changes.
+- Mark replaced sources as `Deprecated`.
+- Add the replacement source as a new registry entry when its meaning or scope differs materially.
+- Do not delete deprecated sources while requirements or historical notes still reference them.
