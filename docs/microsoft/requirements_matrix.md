@@ -18,11 +18,14 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 
 | ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
 |---|---|---|---|---|---|---|---|
-| PBI-001 | Copilot enabled at tenant level | Prerequisites | MS-FAB-02 | Direct | 🔴 | Pending | Admin action |
-| PBI-002 | Fabric capacity in a Copilot-supported region | Prerequisites | MS-FAB-03 | Direct | 🔴 | Pending | |
-| PBI-003 | Paid SKU that supports Copilot; unsupported trial SKUs are excluded | Prerequisites | MS-COP-03 | Direct | 🔴 | Pending | Confirm currently supported SKUs during source review |
-| PBI-004 | Cross-region Azure OpenAI processing is enabled when required by tenant or capacity location | Prerequisites | MS-FAB-02 | Direct | 🔴 | Pending | Otherwise Copilot can be unavailable by default |
-| PBI-005 | Power BI Q&A is enabled on the model when required by Prep data for AI functionality | Prerequisites | MS-PREP-01 | Direct | 🔴 | Pending | Confirm exact feature dependency |
+| PBI-001 | Copilot is enabled at the tenant level by a Fabric administrator | Prerequisites | MS-FAB-02 | Direct | 🔴 | Pending | Required before Copilot features become available |
+| PBI-002 | The semantic model is hosted in a supported Fabric capacity | Prerequisites | MS-FAB-03 | Direct | 🔴 | Pending | Verify supported SKU |
+| PBI-003 | The Fabric capacity is located in a region where Copilot is supported | Prerequisites | MS-FAB-03 | Direct | 🔴 | Pending | Verify regional availability |
+| PBI-004 | Cross-region Azure OpenAI processing is enabled when required | Prerequisites | MS-FAB-02 | Direct | 🔴 | Pending | Required for some tenant configurations |
+| PBI-005 | Power BI Q&A is enabled before configuring Prep Data for AI features | Prerequisites | MS-PREP-02, MS-PREP-03 | Direct | 🔴 | Pending | Required for AI data schema and verified answers |
+| PBI-006 | The user has permission to create or edit AI preparation artifacts | Prerequisites | MS-PREP-01 | Direct | 🟡 | Pending | Author permissions are required |
+| PBI-007 | The semantic model is stored in a supported workspace | Prerequisites | MS-FAB-03 | Direct | 🔴 | Pending | Unsupported workspaces cannot use Copilot |
+| PBI-008 | The semantic model is refreshable and accessible | Prerequisites | MS-COP-03 | Derived | 🟡 | Pending | Copilot depends on an accessible semantic model |
 
 ## Modeling and Schema
 
@@ -92,22 +95,30 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 
 | ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
 |---|---|---|---|---|---|---|---|
-| PBI-070 | An AI data schema is defined and irrelevant objects are excluded | AI Preparation | MS-PREP-02 | Direct | 🔴 | Pending | Model relationships remain respected |
-| PBI-071 | Verified answers are created for common or nuanced business questions | AI Preparation | MS-PREP-03 | Recommended | 🟡 | Pending | Saved to the semantic model rather than a report |
-| PBI-071a | Verified answers include multiple representative trigger phrases within supported limits | AI Preparation | MS-PREP-03 | Recommended | 🟢 | Pending | Confirm current recommended count and maximum combined length |
-| PBI-072 | AI instructions define business context, terminology, and response rules | AI Preparation | MS-PREP-04 | Direct | 🔴 | Pending | Confirm the current supported character limit |
-| PBI-072a | AI instructions map alternative business terms where needed | AI Preparation | MS-PREP-05 | Recommended | 🟡 | Pending | Example: sellers are also known as closers |
-| PBI-073 | AI preparation follows a deliberate sequence: AI data schema, verified answers, and then AI instructions | AI Preparation | MS-PREP-05 | Recommended | 🟡 | Pending | Instructions are used for final fine-tuning |
-| PBI-074 | The semantic model is marked as approved for Copilot | AI Preparation | MS-COP-04 | Direct | 🔴 | Pending | Removes warning friction for users |
+| PBI-070 | An AI data schema is defined and limited to fields relevant to Copilot questions | AI Preparation | MS-PREP-02 | Direct | 🔴 | Pending | A focused schema reduces ambiguity; model relationships continue to be respected |
+| PBI-070a | Hidden, technical, confusing, and irrelevant fields are excluded from the AI data schema | AI Preparation | MS-PREP-02 | Recommended | 🟡 | Pending | Prioritize clean columns with limited ambiguity |
+| PBI-071 | Verified answers are created for common, important, or nuanced business questions | AI Preparation | MS-PREP-03 | Recommended | 🟡 | Pending | Verified answers are stored in the semantic model |
+| PBI-071a | Each verified answer uses representative trigger phrases within supported limits | AI Preparation | MS-PREP-03 | Recommended | 🟢 | Pending | Microsoft recommends 5–7 phrases; supported maximum is 15 phrases and 500 combined characters |
+| PBI-071b | Verified answers use supported visuals and supported semantic-model connection modes | AI Preparation | MS-PREP-03 | Direct | 🟡 | Pending | Validate visual type, model type, filters, and report context |
+| PBI-071c | Verified-answer trigger behavior is tested without unrelated Copilot authoring skills interfering | AI Preparation | MS-PREP-03 | Recommended | 🟡 | Pending | Use the skill selector during Desktop testing where applicable |
+| PBI-072 | AI instructions define relevant business context, terminology, and interpretation rules | AI Preparation | MS-PREP-04 | Direct | 🔴 | Pending | Instructions are model-level configuration and support up to 10,000 characters |
+| PBI-072a | AI instructions map alternative business terms to model concepts where needed | AI Preparation | MS-PREP-04, MS-PREP-05 | Recommended | 🟡 | Pending | Define terminology that Copilot cannot reliably infer from model metadata |
+| PBI-072b | AI instructions contain only guidance that is valid across the semantic model | AI Preparation | MS-PREP-04 | Derived | 🟡 | Pending | Consumers cannot inspect or disable the instructions |
+| PBI-073 | AI preparation follows a deliberate sequence: AI data schema, verified answers, and then AI instructions | AI Preparation | MS-PREP-05 | Recommended | 🟡 | Pending | Use instructions for final refinement after reducing schema ambiguity and configuring curated answers |
+| PBI-074 | The semantic model is marked as approved for Copilot | AI Preparation | MS-COP-04 | Direct | 🔴 | Pending | Verification remains pending until MS-COP-04 is reviewed |
+| PBI-075 | Copilot indexing is reviewed and configured for the semantic model | AI Preparation | MS-PREP-06 | Direct | 🟡 | Pending | Indexes model metadata and column values to improve speed and accuracy |
+| PBI-075a | Local Desktop Indexing is reviewed for DirectQuery and live connection scenarios | AI Preparation | MS-PREP-06 | Direct | 🟡 | Pending | Power BI Desktop setting configured per machine; not applicable to Import models |
 
 ## Testing and Validation
 
 | ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
 |---|---|---|---|---|---|---|---|
-| PBI-080 | The model is tested through the Copilot pane and relevant model-selection experience | Testing | MS-PREP-01 | Direct | 🔴 | Pending | Reopen the pane after model updates when required |
-| PBI-081 | Copilot diagnostic information is reviewed to understand generated answers | Testing | MS-PREP-01 | Recommended | 🟡 | Pending | Confirm the current product name of the diagnostic experience |
-| PBI-082 | Copilot tests are repeated after relevant model changes | Testing | MS-COP-04 | Recommended | 🟡 | Pending | |
-| PBI-083 | Model integrity is verified after renames or structural changes | Testing | MS-MODEL-03 | Derived | 🔴 | Pending | Check relationships, RLS, field parameters, and dependent objects |
+| PBI-080 | The AI data schema is tested with included and excluded fields | Testing | MS-PREP-02 | Direct | 🔴 | Pending | Copilot should answer with included fields and avoid answering from fields outside the configured schema |
+| PBI-081 | Verified answers are tested with representative trigger phrases and filter combinations | Testing | MS-PREP-03 | Direct | 🔴 | Pending | Validate that the expected approved visual is returned |
+| PBI-082 | AI instructions are tested against representative business-language questions | Testing | MS-PREP-04 | Direct | 🔴 | Pending | Confirm that terminology and interpretation rules affect responses as intended |
+| PBI-083 | The Copilot pane is refreshed after changes to AI data schemas or AI instructions | Testing | MS-PREP-02, MS-PREP-04 | Direct | 🟡 | Pending | Close and reopen the pane before evaluating updated behavior in Power BI Desktop |
+| PBI-084 | Prep Data for AI changes are retested after publication to the Power BI service | Testing | MS-PREP-01, MS-PREP-02 | Recommended | 🟡 | Pending | Changes can take time before affecting Copilot results |
+| PBI-085 | Model integrity is verified after renames or structural changes | Testing | MS-MODEL-03 | Derived | 🔴 | Pending | Check relationships, RLS, field parameters, and dependent objects; source verification remains pending |
 
 ## Rollup
 
@@ -123,9 +134,10 @@ Fill this table during the model review.
 | Discoverability | 2 | 0 | 2 | 0 |
 | Hidden and Technical Fields | 3 | 0 | 3 | 0 |
 | Security | 1 | 0 | 1 | 0 |
-| AI Preparation | 7 | 0 | 7 | 0 |
-| Testing and Validation | 4 | 0 | 4 | 0 |
-| **Total** | **45** | **0** | **45** | **0** |
+| AI Preparation | 13 | 0 | 13 | 0 |
+| Testing and Validation | 6 | 0 | 6 | 0 |
+| Prerequisites | 8 | 0 | 8 | 0 |
+| **Total** | **56** | **0** | **56** | **0** |
 
 ## Evidence Rollup
 

@@ -15,7 +15,7 @@ Source identifiers must remain stable even when Microsoft changes a document tit
 | Status | Meaning |
 |---|---|
 | `Planned` | Source has been identified but not reviewed |
-| `Reviewed` | Source has been reviewed, but requirements are not fully verified |
+| `Reviewed` | Source has been reviewed, but mapped requirements are not fully verified |
 | `Verified` | Relevant requirements have been traced to the source |
 | `Deprecated` | Source is outdated or replaced and should not be used for new requirements |
 
@@ -32,11 +32,12 @@ Source identifiers must remain stable even when Microsoft changes a document tit
 
 - `Direct` requirements should normally be treated as mandatory unless the source explicitly limits their scope.
 - `Derived` requirements must include an explanation in the `Notes` column.
-- `Recommended` requirements can be excluded from an MVP readiness assessment when time or scope is limited.
+- `Recommended` requirements can be deferred from an MVP assessment when they do not affect security, reliability, or core answer quality.
 - `Project` requirements must not be presented as official Microsoft requirements.
-- Every requirement except a purely project-specific requirement must have a valid `Source_ID`.
+- Every requirement except a purely project-specific requirement must have at least one valid `Source_ID`.
 - A requirement can have only one primary `Evidence Level`.
-- Additional context can be documented in `review_notes.md`.
+- Multiple `Source_ID` values can be used when a requirement depends on more than one source.
+- Additional findings and ambiguities must be documented in `review_notes.md`.
 
 ## Source Registry
 
@@ -46,11 +47,12 @@ Source identifiers must remain stable even when Microsoft changes a document tit
 | MS-COP-02 | Organize semantic models for Copilot | Copilot | TBD | Current online documentation | TBD | Planned | Model organization, naming, and hidden objects |
 | MS-COP-03 | Optimize semantic models for Copilot | Copilot | TBD | Current online documentation | TBD | Planned | Primary Copilot semantic-model guidance |
 | MS-COP-04 | Prepare semantic models for AI and Copilot | Copilot | TBD | Current online documentation | TBD | Planned | Model cleanup, AI preparation, approval, and validation |
-| MS-PREP-01 | Prep data for AI overview | Prep Data for AI | TBD | Current online documentation | TBD | Planned | Entry point for AI preparation features |
-| MS-PREP-02 | Define an AI data schema | Prep Data for AI | TBD | Current online documentation | TBD | Planned | AI schema scope and object selection |
-| MS-PREP-03 | Create verified answers | Prep Data for AI | TBD | Current online documentation | TBD | Planned | Verified answers and trigger phrases |
-| MS-PREP-04 | Configure AI instructions | Prep Data for AI | TBD | Current online documentation | TBD | Planned | Business context and response instructions |
-| MS-PREP-05 | AI instructions best practices | Prep Data for AI | TBD | Current online documentation | TBD | Planned | Preparation order, terminology, and fine-tuning guidance |
+| MS-PREP-01 | Prepare your data for AI | Prep Data for AI | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai | Current online documentation | 2026-07-17 | Verified | Overview of AI preparation authoring in Power BI Desktop and the Power BI service |
+| MS-PREP-02 | Prepare your data for AI: AI data schemas | Prep Data for AI | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai-data-schema | Current online documentation | 2026-07-17 | Verified | AI schema scope, Q&A prerequisite, testing, refresh behavior, and limitations |
+| MS-PREP-03 | Prepare your data for AI: Verified answers | Prep Data for AI | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai-verified-answers | Current online documentation | 2026-07-17 | Verified | Verified answers, trigger phrases, supported limits, model storage, and testing |
+| MS-PREP-04 | Prepare your data for AI: AI instructions | Prep Data for AI | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai-instructions | Current online documentation | 2026-07-17 | Verified | Business context, terminology, response guidance, testing, and character limit |
+| MS-PREP-05 | Prepare your data for AI FAQ | Prep Data for AI | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai-faq | Current online documentation | 2026-07-17 | Verified | Feature applicability, preparation sequence, descriptions, and model-level behavior |
+| MS-PREP-06 | Prepare your data for AI: Settings | Prep Data for AI | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai-settings | Current online documentation | 2026-07-17 | Verified | Copilot indexing and Local Desktop Indexing settings |
 | MS-MODEL-01 | Understand star schema and its relevance to Power BI | Modeling | TBD | Current online documentation | TBD | Planned | Star-schema design guidance |
 | MS-MODEL-03 | Model relationships in Power BI Desktop | Modeling | TBD | Current online documentation | TBD | Planned | Cardinality, active relationships, and model integrity |
 | MS-MODEL-09 | Calculation groups | Modeling | TBD | Current online documentation | TBD | Planned | Calculation-group behavior and metadata |
@@ -60,13 +62,72 @@ Source identifiers must remain stable even when Microsoft changes a document tit
 | MS-FAB-02 | Copilot tenant settings | Fabric Administration | TBD | Current online documentation | TBD | Planned | Tenant settings and cross-region processing |
 | MS-FAB-03 | Copilot regional availability and capacity requirements | Fabric Administration | TBD | Current online documentation | TBD | Planned | Capacity, SKU, and regional availability |
 
+## Verified Findings: Prep Data for AI
+
+### AI preparation overview
+
+- Prep Data for AI features can be authored in Power BI Desktop and the Power BI service.
+- Configuration changes are stored in the semantic model rather than an individual report.
+- The core preparation features include AI data schemas, verified answers, and AI instructions.
+- Changes can require time or a Copilot pane refresh before affecting responses.
+
+Mapped source: `MS-PREP-01`.
+
+### AI data schemas
+
+- Power BI Q&A must be enabled for the semantic model.
+- An AI data schema defines a focused subset of model fields for Copilot.
+- The reduced schema helps decrease ambiguity and improve response relevance.
+- Model relationships continue to be respected.
+- Hidden fields are initially excluded when the AI data schema is first configured.
+- Consumers cannot disable or view the configured AI data schema.
+- The Copilot pane must be closed and reopened after schema changes when testing.
+
+Mapped source: `MS-PREP-02`.
+
+### Verified answers
+
+- Verified answers associate approved visuals with predefined trigger phrases.
+- Verified answers are stored in the semantic model.
+- Microsoft recommends using five to seven trigger phrases for each verified answer.
+- A verified answer supports up to 15 trigger phrases.
+- Trigger phrases have a combined limit of 500 characters.
+- A semantic model supports up to 250 verified answers.
+- A verified answer supports up to 10 filter permutations.
+- Not every visual type is supported.
+- Verified answers should be tested with relevant Copilot authoring skills disabled when those skills could interfere with trigger testing.
+
+Mapped source: `MS-PREP-03`.
+
+### AI instructions
+
+- AI instructions provide model-level business context and terminology.
+- Instructions can clarify business logic and map user terminology to model concepts.
+- AI instructions are limited to 10,000 characters.
+- Consumers cannot view or disable model instructions.
+- The Copilot pane must be closed and reopened after instruction changes when testing in Power BI Desktop.
+- Instructions are intended to refine Copilot behavior after the primary schema and verified-answer configuration has been prepared.
+
+Mapped sources: `MS-PREP-04`, `MS-PREP-05`.
+
+### Copilot indexing
+
+- Copilot indexing indexes model metadata and column values.
+- Its purpose is to help Copilot answer data questions faster and more accurately.
+- Copilot indexing is editable.
+- Local Desktop Indexing is an additional Power BI Desktop setting.
+- Local Desktop Indexing applies only to DirectQuery and live connection scenarios.
+- Local Desktop Indexing is configured per machine.
+
+Mapped source: `MS-PREP-06`.
+
 ## Review Process
 
 For every source:
 
 1. Add the official Microsoft Learn URL.
 2. Record the date on which the source was reviewed.
-3. Identify the requirements supported by the source.
+3. Identify all requirements supported by the source.
 4. Confirm whether each requirement is `Direct`, `Derived`, or `Recommended`.
 5. Add findings and ambiguities to `review_notes.md`.
 6. Change the source status to `Verified` only after all mapped requirements have been checked.
@@ -76,5 +137,24 @@ For every source:
 - Review verified sources after significant Microsoft Fabric or Power BI Copilot announcements.
 - Do not change an existing `Source_ID` when only the title or URL changes.
 - Mark replaced sources as `Deprecated`.
-- Add the replacement source as a new registry entry when its meaning or scope differs materially.
+- Add a replacement as a new source when its meaning or scope differs materially.
 - Do not delete deprecated sources while requirements or historical notes still reference them.
+- Treat the `Last Reviewed` date as the project review date, not as the Microsoft page publication date.
+
+## Verified Findings: Copilot Prerequisites
+
+### Tenant configuration
+
+- Copilot must be enabled by the Power BI or Fabric administrator.
+- Tenant settings determine whether users can access Copilot features.
+- Cross-region Azure OpenAI processing may be required depending on the tenant configuration.
+
+Mapped source: `MS-FAB-02`.
+
+### Capacity and region
+
+- Copilot requires a supported Fabric capacity.
+- Capacity must reside in a supported geographic region.
+- Unsupported capacities or regions prevent Copilot usage regardless of model quality.
+
+Mapped source: `MS-FAB-03`.
