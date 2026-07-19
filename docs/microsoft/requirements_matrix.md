@@ -1,6 +1,18 @@
 # Requirements Matrix — Power BI Copilot Readiness
 
-> The central artifact of the project. Every readiness requirement is traced to an official Microsoft source or explicitly identified as a project-specific rule.
+> The central project artifact. Every readiness requirement is traced to an official Microsoft source or explicitly identified as a project-specific rule.
+
+## Document Relationships
+
+This matrix is the canonical registry of readiness requirement identifiers.
+
+- [`requirements_matrix.md`](requirements_matrix.md) defines the authoritative `PBI-*` requirements, categories, evidence levels, priorities, and assessment statuses.
+- [`references.md`](references.md) defines every permitted `Source_ID`, its Microsoft Learn URL, review status, and verified findings.
+- [`review_notes.md`](review_notes.md) records source ambiguities, evidence limitations, and unresolved interpretation questions.
+- [`../../rules.yaml`](../../rules.yaml) maps applicable `PBI-*` requirements to executable detection, remediation, and verification rules.
+- [`../adr/ADR-0001-evidence-classification.md`](../adr/ADR-0001-evidence-classification.md) defines the evidence-classification decision used by this matrix.
+
+A change to a `PBI-*` identifier, requirement meaning, `Source_ID`, or evidence level must be reviewed against all linked documents.
 
 ## Legend
 
@@ -12,7 +24,18 @@
 
 Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Priority · Status · Notes**
 
-> Evidence classifications in this initial version are provisional until each Microsoft source is reviewed and marked as `Verified` in `references.md`.
+> Evidence classifications are considered verified only when every supporting `Source_ID` is marked as `Verified` in [`references.md`](references.md). Requirements mapped to a `Planned` or `Reviewed` source remain pending verification.
+
+## Governance Rules
+
+- `PBI-*` identifiers are stable and must not be reused for a different requirement.
+- Every non-project requirement must reference at least one registered `Source_ID`.
+- Every referenced `Source_ID` must exist in the Source Registry in [`references.md`](references.md#source-registry).
+- Requirements mapped to multiple sources are verified only when all supporting sources are `Verified`.
+- [`rules.yaml`](../../rules.yaml) must not use `PBI-*` identifiers outside the range defined in this matrix.
+- Implementation guidance in `rules.yaml` must not be represented as an additional Microsoft requirement unless it is added here with an evidence classification.
+- Source ambiguities and incomplete evidence must be recorded in [`review_notes.md`](review_notes.md).
+- Changes to requirement numbering or meaning must include a repository-wide reference check.
 
 ## Prerequisites
 
@@ -21,7 +44,7 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 | PBI-001 | Copilot access is enabled through the `Users can use Copilot and other features powered by Azure OpenAI` setting | Prerequisites | MS-FAB-02 | Direct | 🔴 | Pending | Verify the effective tenant or delegated capacity configuration for the target experience |
 | PBI-002 | The workspace uses a paid Fabric capacity of F2 or higher or a Power BI Premium capacity of P1 or higher | Prerequisites | MS-FAB-03 | Direct | 🔴 | Pending | Trial capacities, trial SKUs, Pro-only workspaces, and PPU-only workspaces do not directly satisfy the standard capacity requirement |
 | PBI-003 | The capacity is located in a region supported for Copilot | Prerequisites | MS-FAB-03 | Direct | 🔴 | Pending | Validate against the current Microsoft Fabric region availability documentation |
-| PBI-004 | Cross-region Azure OpenAI processing is enabled when the capacity region requires it | Prerequisites | MS-FAB-02 | Direct | 🔴 | Pending | Conditional requirement; do not mark as required when Azure OpenAI processing is available within the applicable boundary |
+| PBI-004 | Cross-region Azure OpenAI processing is enabled when the capacity region requires it | Prerequisites | MS-FAB-02 | Direct | 🔴 | Pending | Conditional requirement; mark `N/A` only when cross-region processing is not required for the applicable boundary |
 | PBI-005 | The target report or semantic model is stored in a workspace assigned to a Copilot-enabled supported capacity | Prerequisites | MS-FAB-02, MS-FAB-03 | Direct | 🔴 | Pending | Copilot-enabled items must be associated with a supported workspace and capacity |
 | PBI-006 | Intended users have access to the workspace and item required for the Copilot experience | Prerequisites | MS-FAB-02 | Direct | 🔴 | Pending | Existing Power BI permissions continue to control accessible data and items |
 | PBI-007 | Power BI Desktop users have Admin, Member, or Contributor access to at least one Copilot-compatible workspace | Prerequisites | MS-FAB-03 | Direct | 🟡 | Pending | Applies only when Copilot is used in Power BI Desktop |
@@ -30,98 +53,107 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 
 ## Modeling and Schema
 
-| ID | Requirement | Evidence | Source |
-|----|-------------|----------|--------|
-| PBI-010 | Design semantic models using a star schema. | Recommended | MS-MODEL-01 |
-| PBI-011 | Separate fact and dimension tables. | Recommended | MS-MODEL-01 |
-| PBI-012 | Do not mix fact and dimension data within the same table. | Recommended | MS-MODEL-01 |
-| PBI-013 | Maintain a consistent grain within each fact table. | Recommended | MS-MODEL-01 |
-| PBI-014 | Configure one-to-many relationships from dimension tables to fact tables. | Recommended | MS-MODEL-01 |
+| ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| PBI-010 | Design semantic models using a star schema | Modeling and Schema | MS-MODEL-01 | Recommended | 🟡 | Pending | Assess the overall model structure and document material deviations |
+| PBI-011 | Separate fact and dimension tables | Modeling and Schema | MS-MODEL-01 | Recommended | 🟡 | Pending | Classify relevant tables as fact, dimension, bridge, or technical |
+| PBI-012 | Do not mix fact and dimension data within the same table | Modeling and Schema | MS-MODEL-01 | Recommended | 🟡 | Pending | Document exceptions where mixed responsibilities cannot yet be refactored |
+| PBI-013 | Maintain a consistent grain within each fact table | Modeling and Schema | MS-MODEL-01 | Recommended | 🟡 | Pending | Record the expected grain of each assessed fact table |
+| PBI-014 | Configure one-to-many relationships from dimension tables to fact tables | Modeling and Schema | MS-MODEL-01 | Recommended | 🟡 | Pending | Relationship changes require explicit human approval under the relationship invariant in `rules.yaml` |
 
 ## Relationships
 
-| PBI-015 | Define active relationships whenever possible. | Recommended | MS-MODEL-03 |
-| PBI-016 | Duplicate role-playing dimension tables instead of relying on inactive relationships when multiple active filter paths are required. | Recommended | MS-MODEL-03 |
-| PBI-017 | Use inactive relationships only for specific calculation scenarios together with USERELATIONSHIP(). | Recommended | MS-MODEL-03 |
-| PBI-018 | Minimize the use of bi-directional relationships. | Recommended | MS-MODEL-04 |
-| PBI-019 | Use bi-directional filtering only when required for supported modeling scenarios. | Recommended | MS-MODEL-04 |
-| PBI-020 | Prefer CROSSFILTER() in DAX over permanent bi-directional relationships for slicer filtering scenarios. | Recommended | MS-MODEL-04 |
-| PBI-021 | Do not rely on inactive relationships for Row-Level Security propagation. | Direct | MS-MODEL-03 |
+| ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| PBI-015 | Define active relationships whenever possible | Relationships | MS-MODEL-03 | Recommended | 🟡 | Pending | Review and justify each inactive relationship |
+| PBI-016 | Duplicate role-playing dimension tables instead of relying on inactive relationships when multiple active filter paths are required | Relationships | MS-MODEL-03 | Recommended | 🟡 | Pending | Assess dimensions that serve multiple semantic roles |
+| PBI-017 | Use inactive relationships only for specific calculation scenarios together with `USERELATIONSHIP()` | Relationships | MS-MODEL-03 | Recommended | 🟡 | Pending | Confirm that each inactive relationship has a documented calculation use |
+| PBI-018 | Minimize the use of bi-directional relationships | Relationships | MS-MODEL-04 | Recommended | 🟡 | Pending | Document the reason for each bi-directional relationship |
+| PBI-019 | Use bi-directional filtering only when required for supported modeling scenarios | Relationships | MS-MODEL-04 | Recommended | 🟡 | Pending | Flag ambiguous or unsupported filter paths |
+| PBI-020 | Prefer `CROSSFILTER()` in DAX over permanent bi-directional relationships for slicer filtering scenarios | Relationships | MS-MODEL-04 | Recommended | 🟡 | Pending | Review whether filter-direction changes can be limited to individual calculations |
+| PBI-021 | Do not rely on inactive relationships for Row-Level Security propagation | Relationships | MS-MODEL-03 | Direct | 🔴 | Pending | Validate RLS filter paths independently of inactive relationships |
 
 ## Naming
 
-| PBI-022 | Use human-readable names for tables, columns, and measures. | Recommended | MS-NAME-01 |
-| PBI-023 | Use consistent naming conventions throughout the semantic model. | Recommended | MS-NAME-01 |
-| PBI-024 | Avoid excessive acronyms, abbreviations, and punctuation in object names. | Recommended | MS-NAME-01 |
-| PBI-025 | Use business-friendly names that reflect how users naturally refer to the data. | Recommended | MS-NAME-02 |
-| PBI-026 | Provide descriptions to distinguish similarly named fields when renaming is insufficient. | Recommended | MS-NAME-01 |
-| PBI-027 | Add descriptions and synonyms when technical object names cannot be changed. | Recommended | MS-NAME-02 |
-| PBI-028 | Name measures in English to improve Copilot understanding. | Recommended | MS-NAME-01 |
+| ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| PBI-022 | Use human-readable names for tables, columns, and measures | Naming | MS-NAME-01 | Recommended | 🟡 | Pending | Renames require approved business context and dependency validation |
+| PBI-023 | Use consistent naming conventions throughout the semantic model | Naming | MS-NAME-01 | Recommended | 🟡 | Pending | Review capitalization, spacing, pluralization, and terminology consistently |
+| PBI-024 | Avoid excessive acronyms, abbreviations, and punctuation in object names | Naming | MS-NAME-01 | Recommended | 🟡 | Pending | Retain established acronyms only when they are understood by intended users |
+| PBI-025 | Use business-friendly names that reflect how users naturally refer to the data | Naming | MS-NAME-02 | Recommended | 🟡 | Pending | Use approved terminology from the business glossary or other validated context |
+| PBI-026 | Provide descriptions to distinguish similarly named fields when renaming is insufficient | Naming | MS-NAME-01 | Recommended | 🟡 | Pending | Include differences in meaning, grain, unit, or intended use |
+| PBI-027 | Add descriptions and synonyms when technical object names cannot be changed | Naming | MS-NAME-02 | Recommended | 🟡 | Pending | Synonyms may require manual application when the MCP does not support writes |
+| PBI-028 | Name measures in English to improve Copilot understanding | Naming | MS-NAME-01 | Recommended | 🟡 | Pending | Rename only when an approved English business term is available |
 
 ## Measures
 
-| PBI-029 | Review Copilot-generated measure descriptions before publishing the semantic model. | Recommended | MS-MEASURE-01 |
-| PBI-030 | Every visible measure has an accurate, concise, and helpful description. | Recommended | MS-MEASURE-01 |
+| ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| PBI-029 | Review Copilot-generated measure descriptions before publishing the semantic model | Measures | MS-MEASURE-01 | Recommended | 🟡 | Pending | Human review must confirm meaning, calculation interpretation, units, and usage |
+| PBI-030 | Every visible measure has an accurate, concise, and helpful description | Measures | MS-MEASURE-01 | Recommended | 🟡 | Pending | Descriptions must use validated business context and must not merely repeat the measure name |
 
 ## Metadata and Descriptions
 
-| ID | Requirement | Evidence | Source |
-|---|---|---|---|
-| PBI-031 | Add accurate, concise, and helpful descriptions to visible tables and business-relevant columns. | Recommended | MS-META-01 |
-| PBI-032 | Configure data types, format strings, and data categories accurately for fields exposed to Copilot. | Derived | MS-META-01 |
+| ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| PBI-031 | Add accurate, concise, and helpful descriptions to visible tables and business-relevant columns | Metadata and Descriptions | MS-META-01 | Recommended | 🟡 | Pending | Front-load useful business meaning as implementation guidance; do not treat a character target as a separate requirement |
+| PBI-032 | Configure data types, format strings, and data categories accurately for fields exposed to Copilot | Metadata and Descriptions | MS-META-01 | Derived | 🟡 | Pending | Validate dependent calculations when changing data types or formatting metadata |
 
 ## Discoverability
 
-| ID | Requirement | Category | Source_ID |
-|----|-------------|----------|-----------|
-| PBI-033 | Add synonyms for important business tables and fields used in natural-language queries. | Discoverability | MS-DISC-01 |
+| ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| PBI-033 | Add synonyms for important business tables and fields used in natural-language queries | Discoverability | MS-DISC-01 | Recommended | 🟡 | Pending | Maintain proposed synonyms in the manual lane when write support is unavailable |
 
 ## Hidden and Technical Fields
 
-| ID | Requirement | Category | Source_ID | Evidence Level |
-|----|-------------|----------|-----------|----------------|
-| PBI-034 | Hide technical columns and measures that aren't intended for report consumers or Copilot interactions. | Model Organization | MS-HIDDEN-01 | Recommended |
+| ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| PBI-034 | Hide technical columns and measures that are not intended for report consumers or Copilot interactions | Hidden and Technical Fields | MS-HIDDEN-01 | Recommended | 🟡 | Pending | Preserve relationships, sort bindings, and dependent calculations when hiding objects |
 
 ## Security
 
-| ID | Requirement | Category | Source_ID | Evidence Level |
-|----|-------------|----------|-----------|----------------|
-| PBI-035 | Implement and validate Row-Level Security (RLS) when the semantic model contains data that requires restricted access. | Security | MS-SEC-01 | Direct |
+| ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| PBI-035 | Implement and validate Row-Level Security when the semantic model contains data that requires restricted access | Security | MS-SEC-01 | Direct | 🔴 | Pending | Record representative user-context testing or document why RLS is not applicable |
 
 ## AI Preparation
 
 | ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
 |---|---|---|---|---|---|---|---|
-| PBI-036 | Power BI Q&A is enabled before configuring AI data schema or verified answers | AI Preparation | MS-PREP-02, MS-PREP-03 | Direct | 🔴 | Pending | Required by the Prep Data for AI features that depend on Q&A |
+| PBI-036 | Power BI Q&A is enabled before configuring AI data schemas or verified answers | AI Preparation | MS-PREP-02, MS-PREP-03 | Direct | 🔴 | Pending | Required by Prep Data for AI features that depend on Q&A |
 | PBI-037 | An AI data schema is defined and limited to fields relevant to Copilot questions | AI Preparation | MS-PREP-02 | Direct | 🔴 | Pending | A focused schema reduces ambiguity; model relationships continue to be respected |
-| PBI-038 | Hidden, technical, confusing, and irrelevant fields are excluded from the AI data schema | AI Preparation | MS-PREP-02 | Recommended | 🟡 | Pending | Prioritize clean columns with limited ambiguity |
+| PBI-038 | Hidden, technical, confusing, and irrelevant fields are excluded from the AI data schema | AI Preparation | MS-PREP-02 | Recommended | 🟡 | Pending | Prioritize clean fields with limited ambiguity |
 | PBI-039 | Verified answers are created for common, important, or nuanced business questions | AI Preparation | MS-PREP-03 | Recommended | 🟡 | Pending | Verified answers are stored in the semantic model |
-| PBI-040 | Each verified answer uses representative trigger phrases within supported limits | AI Preparation | MS-PREP-03 | Recommended | 🟢 | Pending | Microsoft recommends 5–7 phrases; supported maximum is 15 phrases and 500 combined characters |
+| PBI-040 | Each verified answer uses representative trigger phrases within supported limits | AI Preparation | MS-PREP-03 | Recommended | 🟢 | Pending | Microsoft recommends five to seven phrases; the supported maximum is 15 phrases and 500 combined characters |
 | PBI-041 | Verified answers use supported visuals and supported semantic-model connection modes | AI Preparation | MS-PREP-03 | Direct | 🟡 | Pending | Validate visual type, model type, filters, and report context |
 | PBI-042 | Verified-answer trigger behavior is tested without unrelated Copilot authoring skills interfering | AI Preparation | MS-PREP-03 | Recommended | 🟡 | Pending | Use the skill selector during Desktop testing where applicable |
 | PBI-043 | AI instructions define relevant business context, terminology, and interpretation rules | AI Preparation | MS-PREP-04 | Direct | 🔴 | Pending | Instructions are model-level configuration and support up to 10,000 characters |
 | PBI-044 | AI instructions map alternative business terms to model concepts where needed | AI Preparation | MS-PREP-04, MS-PREP-05 | Recommended | 🟡 | Pending | Define terminology that Copilot cannot reliably infer from model metadata |
-| PBI-045 | AI instructions contain only guidance that is valid across the semantic model | AI Preparation | MS-PREP-04 | Derived | 🟡 | Pending | Consumers cannot inspect or disable the instructions |
+| PBI-045 | AI instructions contain only guidance that is valid across the semantic model | AI Preparation | MS-PREP-04 | Derived | 🟡 | Pending | Consumers cannot inspect or disable the instructions; avoid report-specific or temporary guidance |
 | PBI-046 | AI preparation follows a deliberate sequence: AI data schema, verified answers, and then AI instructions | AI Preparation | MS-PREP-05 | Recommended | 🟡 | Pending | Use instructions for final refinement after reducing schema ambiguity and configuring curated answers |
-| PBI-047 | The semantic model is marked as approved for Copilot | AI Preparation | MS-COP-04 | Direct | 🔴 | Pending | Verification remains pending until MS-COP-04 is reviewed |
+| PBI-047 | The semantic model is marked as Approved for Copilot | AI Preparation | MS-COP-04 | Direct | 🔴 | Pending | Mark the semantic model as Approved for Copilot after completing AI preparation and review |
 | PBI-048 | Copilot indexing is reviewed and configured for the semantic model | AI Preparation | MS-PREP-06 | Direct | 🟡 | Pending | Indexes model metadata and column values to improve speed and accuracy |
-| PBI-049 | Local Desktop Indexing is reviewed for DirectQuery and live connection scenarios | AI Preparation | MS-PREP-06 | Direct | 🟡 | Pending | Power BI Desktop setting configured per machine; not applicable to Import models |
+| PBI-049 | Local Desktop Indexing is reviewed for DirectQuery and live connection scenarios | AI Preparation | MS-PREP-06 | Direct | 🟡 | Pending | Configured per machine in Power BI Desktop; mark `N/A` for Import models |
 
 ## Testing and Validation
 
 | ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
 |---|---|---|---|---|---|---|---|
-| PBI-050 | The AI data schema is tested with included and excluded fields | Testing | MS-PREP-02 | Direct | 🔴 | Pending | Copilot should answer with included fields and avoid answering from fields outside the configured schema |
-| PBI-051 | Verified answers are tested with representative trigger phrases and filter combinations | Testing | MS-PREP-03 | Direct | 🔴 | Pending | Validate that the expected approved visual is returned |
-| PBI-052 | AI instructions are tested against representative business-language questions | Testing | MS-PREP-04 | Direct | 🔴 | Pending | Confirm that terminology and interpretation rules affect responses as intended |
-| PBI-053 | The Copilot pane is refreshed after changes to AI data schemas or AI instructions | Testing | MS-PREP-02, MS-PREP-04 | Direct | 🟡 | Pending | Close and reopen the pane before evaluating updated behavior in Power BI Desktop |
-| PBI-054 | Prep Data for AI changes are retested after publication to the Power BI service | Testing | MS-PREP-01, MS-PREP-02 | Recommended | 🟡 | Pending | Changes can take time before affecting Copilot results |
-| PBI-055 | Model integrity is verified after renames or structural changes | Testing | MS-MODEL-03 | Derived | 🔴 | Pending | Check relationships, RLS, field parameters, and dependent objects; source verification remains pending |
+| PBI-050 | The AI data schema is tested with included and excluded fields | Testing and Validation | MS-PREP-02 | Direct | 🔴 | Pending | Copilot should answer using included fields and avoid answering from fields outside the configured schema |
+| PBI-051 | Verified answers are tested with representative trigger phrases and filter combinations | Testing and Validation | MS-PREP-03 | Direct | 🔴 | Pending | Validate that the expected approved visual is returned |
+| PBI-052 | AI instructions are tested against representative business-language questions | Testing and Validation | MS-PREP-04 | Direct | 🔴 | Pending | Confirm that terminology and interpretation rules affect responses as intended |
+| PBI-053 | The Copilot pane is refreshed after changes to AI data schemas or AI instructions | Testing and Validation | MS-PREP-02, MS-PREP-04 | Direct | 🟡 | Pending | Close and reopen the pane before evaluating updated behavior in Power BI Desktop |
+| PBI-054 | Prep Data for AI changes are retested after publication to the Power BI service | Testing and Validation | MS-PREP-01, MS-PREP-02 | Recommended | 🟡 | Pending | Allow configuration changes to propagate before repeating representative tests |
+| PBI-055 | Model integrity is verified after renames or structural changes | Testing and Validation | MS-MODEL-03 | Derived | 🔴 | Pending | Check relationships, RLS, field parameters, sort bindings, expressions, and dependent objects |
+
+## Requirement Summary
 
 | Category | Total | Met | Pending | Blocked |
 |---|---:|---:|---:|---:|
 | Prerequisites | 9 | 0 | 9 | 0 |
-| Modeling and Schema | 12 | 0 | 12 | 0 |
+| Modeling and Schema | 5 | 0 | 5 | 0 |
+| Relationships | 7 | 0 | 7 | 0 |
 | Naming | 7 | 0 | 7 | 0 |
 | Measures | 2 | 0 | 2 | 0 |
 | Metadata and Descriptions | 2 | 0 | 2 | 0 |
@@ -134,16 +166,39 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 
 ## Evidence Rollup
 
-Update this table after the source-review process.
+Evidence verification is derived from the current Source Registry in [`references.md`](references.md#source-registry).
+
+A requirement is counted as verified only when every supporting `Source_ID` has status `Verified`.
 
 | Evidence Level | Total | Verified | Pending Verification |
 |---|---:|---:|---:|
-| Direct | 20 | 0 | 20 |
-| Derived | 3 | 0 | 3 |
-| Recommended | 32 | 0 | 32 |
+| Direct | 22 | 21 | 1 |
+| Derived | 3 | 1 | 2 |
+| Recommended | 30 | 13 | 17 |
 | Project | 0 | 0 | 0 |
-| **Total classified requirements** | **55** | **0** | **55** |
+| **Total classified requirements** | **55** | **35** | **20** |
 
+### Verification Boundary
+
+The following requirements remain pending source verification because at least one supporting source is still `Planned`:
+
+- `PBI-015`–`PBI-021`
+- `PBI-022`–`PBI-033`
+- `PBI-055`
+
+All other requirements are mapped only to sources currently recorded as `Verified` in [`references.md`](references.md).
+
+This rollup describes **evidence verification**, not implementation status. A requirement can have verified evidence while its assessment status remains `Pending`.
+
+## Executable Rule Coverage
+
+[`rules.yaml`](../../rules.yaml) is the executable companion to this matrix.
+
+- Environment, capacity, security, AI preparation, and service-level requirements can be assessment-only or manual.
+- Metadata requirements can be automated only when the required business context is available.
+- Relationship requirements are protected by the relationship invariant and are not automatically modified.
+- Requirements without supported write operations must produce manual-lane deliverables rather than untracked changes.
+- Any rule that cannot map to one of the `PBI-*` identifiers in this matrix must be treated as implementation guidance or proposed as a new project requirement.
 
 ## MVP Scope Guidance
 
@@ -158,9 +213,23 @@ For an initial readiness assessment:
 - Record deferred requirements as `N/A` only when they are genuinely not applicable.
 - Keep applicable but postponed requirements as `Pending`.
 
+## Maintenance Checklist
+
+When this matrix changes:
+
+1. Confirm that requirement IDs remain unique and contiguous where intended.
+2. Update the Source Registry and verified findings in [`references.md`](references.md).
+3. Update executable mappings in [`rules.yaml`](../../rules.yaml).
+4. Record evidence ambiguities in [`review_notes.md`](review_notes.md).
+5. Review relevant architecture decisions under [`../adr/`](../adr/).
+6. Search the entire repository for obsolete `PBI-*` and `Source_ID` references.
+7. Recalculate the Requirement Summary and Evidence Rollup.
+8. Record the change below.
+
 ## Change Log
 
 | Date | Change | By |
 |---|---|---|
 | 2026-07-12 | Initial matrix seeded from Microsoft sources | Rostyslav Lisovyi |
 | 2026-07-17 | Added evidence classification and MVP scope guidance | Rostyslav Lisovyi |
+| 2026-07-19 | Aligned requirement numbering, source verification, executable-rule mappings, cross-document links, summaries, and evidence rollup | Rostyslav Lisovyi |

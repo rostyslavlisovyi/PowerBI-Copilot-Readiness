@@ -1417,15 +1417,15 @@ validation:
     reject_unknown_ids: true
 
     explicitly_rejected_examples:
-      - PBI-071a
-      - PBI-072a
-      - PBI-060
-      - PBI-065
-      - PBI-070
-      - PBI-074
-      - PBI-080
-      - PBI-081
-      - PBI-082
+  # Historical IDs kept as validation fixtures.
+  # They must never appear in repository requirements.
+  - PBI-060
+  - PBI-065
+  - PBI-070
+  - PBI-074
+  - PBI-080
+  - PBI-081
+  - PBI-082
 
   source_ids:
     require_registry_entry: true
