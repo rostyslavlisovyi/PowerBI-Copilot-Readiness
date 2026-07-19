@@ -65,14 +65,11 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 
 ## Metadata and Descriptions
 
-| ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
-|---|---|---|---|---|---|---|---|
-| PBI-040 | Tables have descriptions | Metadata | MS-COP-03 | Direct | 🔴 | Pending | |
-| PBI-041 | Business-relevant columns have descriptions | Metadata | MS-COP-03 | Direct | 🟡 | Pending | Confirm whether Microsoft requires descriptions for every visible column |
-| PBI-042 | Key information is placed within the first 200 characters of a description | Metadata | MS-COP-03 | Direct | 🔴 | Pending | Confirm the current documented processing limit |
-| PBI-043 | Calculation groups are documented through the calculation-group column description | Metadata | MS-MODEL-09 | Derived | 🟡 | Pending | Calculation items might not be represented independently in metadata |
-| PBI-044 | Model structure is documented in a data dictionary | Metadata | MS-COP-03 | Project | 🟢 | Pending | Project-level maintainability practice |
-| PBI-045 | Data categories are set where relevant | Metadata | MS-MODEL-13 | Recommended | 🟢 | Pending | Examples: geography and URL fields |
+
+| ID | Requirement | Evidence | Source |
+|---|---|---|---|
+| PBI-040 | Add accurate, concise, and helpful descriptions to visible tables and business-relevant columns. | Recommended | MS-META-01 |
+| PBI-041 | Configure data types, format strings, and data categories accurately for fields exposed to Copilot. | Derived | MS-META-01 |
 
 ## Discoverability
 
