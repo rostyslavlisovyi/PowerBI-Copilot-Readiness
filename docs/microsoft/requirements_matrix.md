@@ -84,9 +84,9 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 
 ## Security
 
-| ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
-|---|---|---|---|---|---|---|---|
-| PBI-065 | Row-level security roles are defined where sensitive data requires them | Security | MS-COP-03 | Derived | 🔴 | Pending | Security requirement derived from data-access obligations; validate before rollout |
+| ID | Requirement | Category | Source_ID | Evidence Level |
+|----|-------------|----------|-----------|----------------|
+| PBI-044 | Implement and validate Row-Level Security (RLS) when the semantic model contains data that requires restricted access. | Security | MS-SEC-01 | Direct |
 
 ## AI Preparation
 
