@@ -61,6 +61,7 @@ Source identifiers must remain stable even when Microsoft changes a document tit
 | MS-MODEL-13 | Data categories in Power BI Desktop | Modeling | TBD | Current online documentation | TBD | Planned | Data-category metadata |
 | MS-FAB-02 | Copilot tenant settings | Fabric Administration | TBD | Current online documentation | TBD | Planned | Tenant settings and cross-region processing |
 | MS-FAB-03 | Copilot regional availability and capacity requirements | Fabric Administration | TBD | Current online documentation | TBD | Planned | Capacity, SKU, and regional availability |
+| MS-HIDDEN-01 | Use Copilot with semantic models | Model Organization | <https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-semantic-models> | Current online documentation | 2026-07-19 | Verified | Microsoft recommends hiding columns and measures as part of semantic model organization for Copilot |
 
 ## Verified Findings: Prep Data for AI
 

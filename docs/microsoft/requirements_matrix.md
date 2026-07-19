@@ -78,11 +78,9 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 
 ## Hidden and Technical Fields
 
-| ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
-|---|---|---|---|---|---|---|---|
-| PBI-060 | Technical relationship keys and raw IDs are hidden from report consumers and AI experiences | Model Organization | MS-COP-04 | Direct | 🔴 | Pending | |
-| PBI-061 | Sort-order helper fields are excluded from the AI schema or hidden | Model Organization | MS-COP-04 | Recommended | 🟡 | Pending | Example: Month Sort Order |
-| PBI-062 | Intermediate calculation measures are hidden | Model Organization | MS-COP-02 | Recommended | 🟡 | Pending | |
+| ID | Requirement | Category | Source_ID | Evidence Level |
+|----|-------------|----------|-----------|----------------|
+| PBI-043 | Hide technical columns and measures that aren't intended for report consumers or Copilot interactions. | Model Organization | MS-HIDDEN-01 | Recommended |
 
 ## Security
 
