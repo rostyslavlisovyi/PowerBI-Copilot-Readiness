@@ -65,7 +65,6 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 
 ## Metadata and Descriptions
 
-
 | ID | Requirement | Evidence | Source |
 |---|---|---|---|
 | PBI-040 | Add accurate, concise, and helpful descriptions to visible tables and business-relevant columns. | Recommended | MS-META-01 |
@@ -73,10 +72,9 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 
 ## Discoverability
 
-| ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
-|---|---|---|---|---|---|---|---|
-| PBI-050 | Synonyms are added for key business objects | Discoverability | MS-MODEL-11 | Recommended | 🟡 | Pending | Confirm direct applicability to current Copilot experiences |
-| PBI-051 | Perspectives are evaluated as a model-scoping mechanism | Discoverability | MS-MODEL-12 | Derived | 🟢 | Pending | Do not treat as mandatory until direct Copilot relevance is confirmed |
+| ID | Requirement | Category | Source_ID |
+|----|-------------|----------|-----------|
+| PBI-050 | Add synonyms for important business tables and fields used in natural-language queries. | Discoverability | MS-DISC-01 |
 
 ## Hidden and Technical Fields
 
