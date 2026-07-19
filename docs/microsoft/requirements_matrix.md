@@ -60,11 +60,8 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 
 ## Measures
 
-| ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
-|---|---|---|---|---|---|---|---|
-| PBI-030 | Measures use standardized and explainable logic | Measures | MS-COP-03 | Recommended | 🟡 | Pending | |
-| PBI-031 | Every visible measure has a description | Metadata | MS-COP-03 | Direct | 🔴 | Pending | Copilot quality depends on clear metadata |
-| PBI-032 | Common business KPIs are predefined as measures | Measures | MS-COP-03 | Recommended | 🟡 | Pending | Examples: YTD and month-over-month |
+| PBI-030 | Review Copilot-generated measure descriptions before publishing the semantic model. | Recommended | MS-MEASURE-01 |
+| PBI-031 | Every visible measure has an accurate, concise, and helpful description. | Recommended | MS-MEASURE-01 |
 
 ## Metadata and Descriptions
 
