@@ -1,52 +1,110 @@
 # ============================================================
 # Power BI Copilot Readiness — Executable Rule Set
-# Machine-readable companion to docs/microsoft/requirements_matrix.md
-# Consumed by the agent defined in .github/copilot-instructions.md
+# Machine-readable companion to:
+#   docs/microsoft/requirements_matrix.md
+#
+# Requirement identifiers must match the current matrix:
+#   PBI-001 through PBI-055
 # ============================================================
 
-version: "1.0"
+version: "1.1"
 project: PowerBI-Copilot-Readiness
+
 source_matrix: docs/microsoft/requirements_matrix.md
 source_references: docs/microsoft/references.md
 
 # ------------------------------------------------------------
-# GLOBAL CONFIG
+# GLOBAL CONFIGURATION
 # ------------------------------------------------------------
+
 config:
-  unit: table                      # the atomic unit of processing is ONE table
+  unit: table
+
+  requirement_id_pattern: "^PBI-[0-9]{3}$"
+  minimum_requirement_id: PBI-001
+  maximum_requirement_id: PBI-055
 
   ordering:
-    strategy: simplicity           # easiest tables first (prove mechanics on small)
+    strategy: simplicity
     ascending: true
-    weight_formula: "(columns + measures) + (2 * detect_failures) + (5 * relationship_count)"
+    weight_formula: >-
+      (columns + measures)
+      + (2 * detect_failures)
+      + (5 * relationship_count)
     tie_breaker: table_name_alpha
 
   transactions:
     wrap_all_writes: true
     scope: per_table
+
     options:
       useTransaction: true
       continueOnError: false
+
     on_verify_fail: rollback
 
   gate:
-    type: await_review             # STOP after each table, wait for approval
+    type: await_review
     when: after_each_table_commit
     resume_source: docs/runs/{model}/queue.md
-    statuses: [pending, in_progress, awaiting_review, approved, rejected]
+
+    statuses:
+      - pending
+      - in_progress
+      - awaiting_review
+      - approved
+      - rejected
+      - blocked
 
   governance:
     data_privacy: metadata_only
-    forbid_dax_returning_row_data: true   # never query client / PII / financial rows
-    rls: out_of_scope              # RLS intentionally excluded from this ruleset
+    forbid_dax_returning_row_data: true
+    require_source_id: true
+    require_matrix_mapping: true
+    allow_unmapped_project_rules: false
+
+  implementation_guidance:
+    descriptions:
+      minimum_length: 10
+      business_context_first: true
+      preferred_summary_length: 200
+      do_not_repeat_object_name: true
+      do_not_invent_business_context: true
+
+    naming:
+      require_business_context_for_rename: true
+      preserve_dependencies: true
+
+    relationships:
+      edit_policy: protect_never_edit
 
 # ------------------------------------------------------------
 # RELATIONSHIP INVARIANT
-# Relationships are NEVER edited. They are captured, guarded, and re-verified.
 # ------------------------------------------------------------
+#
+# Relationships are captured, guarded, and re-verified.
+# The agent does not automatically create, delete, activate,
+# deactivate, or change relationship direction/cardinality.
+#
+# PBI-015 through PBI-021 are assessed and reported, but any
+# structural relationship change requires explicit human approval.
+# ------------------------------------------------------------
+
 relationship_invariant:
   policy: protect_never_edit
+
+  mapped_requirements:
+    - PBI-014
+    - PBI-015
+    - PBI-016
+    - PBI-017
+    - PBI-018
+    - PBI-019
+    - PBI-020
+    - PBI-021
+
   lock_file: docs/runs/{model}/relationships.lock
+
   fingerprint:
     - from_table
     - from_column
@@ -55,301 +113,1356 @@ relationship_invariant:
     - cardinality
     - cross_filter_direction
     - is_active
+
   capture:
     phase: assessment
     when: after_full_audit
     read_via: relationship_operations.List
+
   guard:
     phase: iteration
     step: verify
-    action: re-read relationships touching current table; compare to lock_file
-    on_mismatch: [rollback_transaction, set_status=blocked, escalate]
+    action: >-
+      Re-read every relationship touching the current table
+      and compare it with the relationship lock file.
+
+    on_mismatch:
+      - rollback_transaction
+      - set_status=blocked
+      - escalate
+
   final_check:
     phase: finalization
-    action: re-read ALL relationships; compare entire set to lock_file
+    action: >-
+      Re-read all relationships and compare the complete set
+      with the relationship lock file.
+
     on_mismatch: fail_model
 
 # ------------------------------------------------------------
 # PHASES
 # ------------------------------------------------------------
-phases:
 
-  assessment:                      # ONE-TIME, read-only
+phases:
+  assessment:
+    mode: read_only
+    repeat: once
+
     steps:
-      - connect                            # connection_operations
-      - backup: database_operations.ExportTMDL   # baseline snapshot -> commit
-      - full_audit                         # run all detect rules across whole model
-      - capture_relationships_lock         # write relationships.lock
-      - build_queue                        # ordered table list by simplicity
+      - connect
+      - backup
+      - enumerate_model_objects
+      - full_audit
+      - capture_relationships_lock
+      - build_queue
+
+    operations:
+      backup: database_operations.ExportTMDL
+      relationships: relationship_operations.List
+
     outputs:
-      - docs/runs/{model}/assessment.md    # full state matrix (as-is)
+      - docs/runs/{model}/assessment.md
       - docs/runs/{model}/relationships.lock
       - docs/runs/{model}/queue.md
-    halt_after: true                       # stop; no changes yet
 
-  iteration:                       # REPEATS, one table per pass
+    halt_after: true
+
+  iteration:
     unit: table
-    steps:
-      - pick_next_pending                  # first pending table in queue.md
-      - audit_table                        # detect rules scoped to this table
-      - plan                               # object -> field -> new value -> PBI-* -> Source_ID
-      - begin_transaction                  # transaction_operations.Begin
-      - apply_fixes                        # automatable rules only, batched
-      - verify_rules                       # re-check every touched PBI-*
-      - verify_relationship_guard          # relationship_invariant.guard
-      - commit_or_rollback
-      - snapshot_diff: database_operations.ExportTMDL   # commit; git diff = record
-      - set_status: awaiting_review
-      - STOP                               # gate: wait for approval before next table
+    repeat: until_queue_empty
 
-  finalization:                    # ONE-TIME, when queue is empty
     steps:
-      - full_relationship_integrity_check  # relationship_invariant.final_check
-      - emit_manual_lane_report            # verified answers / AI instructions / etc.
-      - final_report: docs/runs/{model}/summary.md
+      - pick_next_pending
+      - audit_table
+      - create_change_plan
+      - await_change_plan_approval
+      - begin_transaction
+      - apply_approved_fixes
+      - verify_targeted_requirements
+      - verify_relationship_guard
+      - commit_or_rollback
+      - export_snapshot
+      - set_status_awaiting_review
+      - stop_for_review
+
+    operations:
+      begin_transaction: transaction_operations.Begin
+      export_snapshot: database_operations.ExportTMDL
+
+    change_plan_fields:
+      - object
+      - object_type
+      - property
+      - current_value
+      - proposed_value
+      - requirement_id
+      - source_id
+      - verification
+
+  finalization:
+    repeat: once
+    when: queue_empty
+
+    steps:
+      - full_requirement_recheck
+      - full_relationship_integrity_check
+      - emit_manual_lane_report
+      - emit_final_report
+
+    outputs:
+      - docs/runs/{model}/summary.md
+      - docs/manual/{model}/ai-preparation.md
+      - docs/manual/{model}/testing-plan.md
 
 # ------------------------------------------------------------
 # RULES
-# Each rule: detect -> fix -> verify. automatable=false => manual_action.
 # ------------------------------------------------------------
+#
+# Each executable rule is mapped to an existing requirement in
+# docs/microsoft/requirements_matrix.md.
+#
+# automatable: true
+#   The agent can apply the change through supported MCP operations.
+#
+# automatable: false
+#   The agent can assess, report, or draft guidance, but a human must
+#   apply or approve the change.
+# ------------------------------------------------------------
+
 rules:
 
-  # ---- Prerequisites (assessment, human/admin) ----
-  - id: PBI-001..005
-    requirement: Copilot/tenant/capacity prerequisites
-    source_id: MS-FAB-02, MS-FAB-03, MS-COP-03
-    phase: assessment
-    automatable: false
-    detect: environment checks (tenant Copilot on, capacity region, paid SKU, Q&A on)
-    manual_action: confirm with admin before model rollout
+  # ==========================================================
+  # PREREQUISITES
+  # PBI-001 through PBI-009
+  # ==========================================================
 
-  # ---- Structural (assessment, detect only) ----
-  - id: PBI-010
-    requirement: Star schema design is used
-    source_id: MS-MODEL-01
+  - id: PBI-001
+    requirement: Copilot tenant access is enabled
+    source_id:
+      - MS-FAB-02
+    category: Prerequisites
     phase: assessment
     severity: critical
     automatable: false
-    detect: model has clear fact/dimension separation; no snowflake sprawl
-    manual_action: flag structural refactors for human decision
+
+    detect: >-
+      Obtain administrator confirmation that the tenant setting
+      "Users can use Copilot and other features powered by Azure OpenAI"
+      is enabled for the intended users.
+
+    manual_action: >-
+      Record the effective tenant or delegated capacity setting and
+      the security-group scope in the assessment report.
+
+    verify: administrator evidence is recorded
+
+  - id: PBI-002
+    requirement: Workspace uses a supported paid capacity
+    source_id:
+      - MS-FAB-03
+    category: Prerequisites
+    phase: assessment
+    severity: critical
+    automatable: false
+
+    detect: >-
+      Confirm that the workspace is assigned to Fabric F2 or higher,
+      or Power BI Premium P1 or higher.
+
+    manual_action: record capacity SKU and workspace assignment
+    verify: supported paid capacity is confirmed
+
+  - id: PBI-003
+    requirement: Capacity is located in a supported Copilot region
+    source_id:
+      - MS-FAB-03
+    category: Prerequisites
+    phase: assessment
+    severity: critical
+    automatable: false
+
+    detect: identify the capacity region
+    manual_action: validate the region against current Microsoft guidance
+    verify: supported region is recorded
+
+  - id: PBI-004
+    requirement: Cross-region Azure OpenAI processing is enabled when required
+    source_id:
+      - MS-FAB-02
+    category: Prerequisites
+    phase: assessment
+    severity: critical
+    automatable: false
+    conditional: true
+
+    detect: >-
+      Determine whether the capacity region and compliance boundary require
+      cross-region Azure OpenAI processing.
+
+    manual_action: >-
+      Confirm the applicable tenant setting when cross-region processing
+      is required; otherwise mark the requirement N/A with justification.
+
+    verify: requirement is confirmed or documented as not applicable
+
+  - id: PBI-005
+    requirement: Target item is stored in a supported Copilot-enabled workspace
+    source_id:
+      - MS-FAB-02
+      - MS-FAB-03
+    category: Prerequisites
+    phase: assessment
+    severity: critical
+    automatable: false
+
+    detect: identify the target workspace and capacity assignment
+    manual_action: confirm that the workspace is Copilot-compatible
+    verify: supported workspace assignment is recorded
+
+  - id: PBI-006
+    requirement: Intended users have required workspace and item access
+    source_id:
+      - MS-FAB-02
+    category: Prerequisites
+    phase: assessment
+    severity: critical
+    automatable: false
+
+    detect: identify intended user groups and effective permissions
+    manual_action: validate workspace and item access
+    verify: access validation is recorded
+
+  - id: PBI-007
+    requirement: Desktop users have a supported workspace role
+    source_id:
+      - MS-FAB-03
+    category: Prerequisites
+    phase: assessment
+    severity: recommended
+    automatable: false
+    conditional: true
+
+    detect: determine whether Copilot will be used in Power BI Desktop
+
+    manual_action: >-
+      For Desktop use, confirm that users have Admin, Member, or Contributor
+      access to at least one compatible workspace.
+
+    verify: Desktop role is confirmed or requirement is N/A
+
+  - id: PBI-008
+    requirement: Capacity is not a trial capacity or trial SKU
+    source_id:
+      - MS-FAB-03
+    category: Prerequisites
+    phase: assessment
+    severity: critical
+    automatable: false
+
+    detect: inspect or obtain confirmation of capacity SKU
+    manual_action: record that the capacity is paid and non-trial
+    verify: non-trial capacity is confirmed
+
+  - id: PBI-009
+    requirement: Deployment does not rely on an unsupported sovereign cloud
+    source_id:
+      - MS-FAB-03
+    category: Prerequisites
+    phase: assessment
+    severity: critical
+    automatable: false
+
+    detect: identify the deployment cloud environment
+    manual_action: confirm that the environment is supported
+    verify: supported cloud environment is recorded
+
+  # ==========================================================
+  # MODELING AND SCHEMA
+  # PBI-010 through PBI-014
+  # ==========================================================
+
+  - id: PBI-010
+    requirement: Semantic model follows a star schema
+    source_id:
+      - MS-MODEL-01
+    category: Modeling and Schema
+    phase: assessment
+    severity: recommended
+    automatable: false
+
+    detect: >-
+      Review the model for identifiable fact and dimension tables,
+      controlled filter paths, and absence of unnecessary snowflake complexity.
+
+    manual_action: document structural refactoring recommendations
+    verify: model structure is assessed and findings are recorded
+
+  - id: PBI-011
+    requirement: Fact and dimension tables are separated
+    source_id:
+      - MS-MODEL-01
+    category: Modeling and Schema
+    phase: assessment
+    severity: recommended
+    automatable: false
+
+    detect: classify each model table as fact, dimension, bridge, or technical
+    manual_action: flag tables that mix fact and dimension responsibilities
+    verify: every relevant table has a documented role
+
+  - id: PBI-012
+    requirement: Fact and dimension data are not mixed in the same table
+    source_id:
+      - MS-MODEL-01
+    category: Modeling and Schema
+    phase: assessment
+    severity: recommended
+    automatable: false
+
+    detect: identify tables containing both transactional facts and dimension attributes
+    manual_action: recommend separation where appropriate
+    verify: mixed-role tables are absent or documented
+
+  - id: PBI-013
+    requirement: Each fact table has a consistent grain
+    source_id:
+      - MS-MODEL-01
+    category: Modeling and Schema
+    phase: assessment
+    severity: recommended
+    automatable: false
+
+    detect: >-
+      Review fact-table keys, measures, and column semantics for evidence
+      of multiple incompatible grains.
+
+    manual_action: record the expected grain for each fact table
+    verify: fact-table grain is consistent or remediation is documented
+
+  - id: PBI-014
+    requirement: Dimension-to-fact relationships use one-to-many cardinality
+    source_id:
+      - MS-MODEL-01
+    category: Modeling and Schema
+    phase: assessment
+    severity: recommended
+    automatable: false
+    relationship_guard: true
+
+    detect: >-
+      Use relationship_operations.List to inspect cardinality between
+      dimension and fact tables.
+
+    manual_action: report relationships that do not follow the expected pattern
+    verify: expected cardinality is confirmed or exception is documented
+
+  # ==========================================================
+  # RELATIONSHIPS
+  # PBI-015 through PBI-021
+  # ==========================================================
 
   - id: PBI-015
-    requirement: No ambiguous / disconnected relationship traps
-    source_id: MS-COP-04
+    requirement: Relationships are active whenever possible
+    source_id:
+      - MS-MODEL-03
+    category: Relationships
     phase: assessment
     severity: recommended
     automatable: false
-    detect: relationship_operations.List -> check for inactive ambiguity, disconnected field-param traps
-    manual_action: report only (relationships are never auto-edited)
+    relationship_guard: true
+
+    detect: list inactive relationships and identify their purpose
+    manual_action: document whether each inactive relationship is necessary
+    verify: inactive relationships are justified
 
   - id: PBI-016
-    requirement: Unused objects removed
-    source_id: MS-COP-04
+    requirement: Role-playing dimensions are duplicated when active paths are required
+    source_id:
+      - MS-MODEL-03
+    category: Relationships
     phase: assessment
     severity: recommended
     automatable: false
-    detect: objects with no references
-    manual_action: propose deletions; never auto-delete (least-change rule)
-
-  # ---- Per-table metadata (iteration, automatable) ----
-  - id: PBI-040
-    requirement: Table has a description
-    source_id: MS-COP-03
-    phase: iteration
-    severity: critical
-    automatable: true
-    detect: table.description is empty OR length < 10
-    fix: table_operations.Update -> description (business-first, key info in first 200 chars)
-    verify: table.description not empty AND length >= 10
-
-  - id: PBI-041
-    requirement: Columns have descriptions
-    source_id: MS-COP-03
-    phase: iteration
-    severity: recommended
-    automatable: true
-    detect: column.isHidden == false AND (column.description empty OR length < 10)
-    fix: column_operations.Update (batch) -> description
-    verify: all visible columns in table have non-empty description
-
-  - id: PBI-031
-    requirement: Every visible measure has a Copilot-ready description
-    source_id: MS-COP-03
-    phase: iteration
-    severity: critical
-    scope: measure
-    context_source: docs/context/business-glossary.md
-    detect:
-      visible: "measure.isHidden == false"
-      empty_check: 'measure.description.trim() == \"\" OR length < 10'
-      read_via: "measure_operations.List / Get"
-    branches:
-      - id: A_missing
-        when: 'description empty (\"\") or length < 10'
-        automatable: true
-        fix: "measure_operations.Update -> description"
-        rule: "Write from business-glossary.md (use provided context if the measure exists there). Never invent context. Structure: business summary first (<=200 chars: usage, disambiguation, units), then Business Logic, then Usage."
-      - id: B_bloated
-        when: 'description present but > 200 significant chars OR starts with boilerplate (\"Description\", quotes)'
-        automatable: true
-        fix: "measure_operations.Update -> description"
-        rule: "Compress to <=200 significant chars. Keep only business meaning per Microsoft guidance (preferred usage, disambiguation, units). Drop boilerplate headers and name repetition. Detailed sections may follow but must not push business meaning out of the first 200 chars."
-      - id: C_conflict
-        when: "measure name and description describe contradictory things"
-        automatable: false
-        flag_only: true
-        fix: none
-        action: "Do NOT edit. Append a row to docs/manual/name-description-conflicts.md with: measure name, current name, current description, nature of contradiction. Continue to next measure."
-    verify:
-      A_B: "description not empty AND length >= 10 AND first 200 chars carry business meaning (not name-equal, no boilerplate prefix)"
-      C: "conflict recorded in docs/manual/name-description-conflicts.md; model unchanged for this measure"
-
-  - id: PBI-042
-    requirement: Key info sits within the first 200 chars of the description
-    source_id: MS-COP-03
-    reference: "microsoft/skills-for-fabric semantic-model-ai-readiness (front-load; do not restate name)"
-    phase: iteration
-    severity: critical
-    scope: [table, column, measure]
-    automatable: true
-    detect: 'first 200 chars start with boilerplate (\"Description\", quotes) OR merely repeat the object name OR contain no usage/disambiguation/units'
-    fix: "rewrite so the first sentence (<=200 chars) carries business meaning: preferred usage, disambiguation vs similar fields, expected grain, units"
-    verify: "first 200 chars differ from the name AND convey purpose AND contain no boilerplate prefix"
-
-  - id: PBI-045
-    requirement: Data categories set where relevant
-    source_id: MS-MODEL-13
-    phase: iteration
-    severity: nice-to-have
-    automatable: true
-    detect: geo/URL/image-like columns with dataCategory unset
-    fix: column_operations.Update -> dataCategory
-    verify: targeted columns have dataCategory set
-
-  # ---- Per-table naming (iteration, automatable, RELATIONSHIP-SENSITIVE) ----
-  - id: PBI-020
-    requirement: Human-readable table name (no "table" suffix)
-    source_id: MS-COP-02
-    phase: iteration
-    severity: critical
-    automatable: true
     relationship_guard: true
-    detect: table name has technical suffix / prefix / underscores
-    fix: table_operations.Rename
-    verify: name human-readable AND relationship guard passes
+
+    detect: identify dimensions used in multiple semantic roles
+    manual_action: recommend separate role-playing dimensions where needed
+    verify: role-playing design is reviewed
+
+  - id: PBI-017
+    requirement: Inactive relationships are limited to specific calculation scenarios
+    source_id:
+      - MS-MODEL-03
+    category: Relationships
+    phase: assessment
+    severity: recommended
+    automatable: false
+    relationship_guard: true
+
+    detect: >-
+      Identify inactive relationships and search measure definitions for
+      corresponding USERELATIONSHIP usage.
+
+    manual_action: flag inactive relationships without a documented calculation use
+    verify: inactive relationships have a specific supported purpose
+
+  - id: PBI-018
+    requirement: Bi-directional relationships are minimized
+    source_id:
+      - MS-MODEL-04
+    category: Relationships
+    phase: assessment
+    severity: recommended
+    automatable: false
+    relationship_guard: true
+
+    detect: list relationships with bidirectional cross-filtering
+    manual_action: document the reason for every bidirectional relationship
+    verify: bidirectional relationships are minimized and justified
+
+  - id: PBI-019
+    requirement: Bi-directional filtering is used only for supported scenarios
+    source_id:
+      - MS-MODEL-04
+    category: Relationships
+    phase: assessment
+    severity: recommended
+    automatable: false
+    relationship_guard: true
+
+    detect: review each bidirectional relationship against its modeling scenario
+    manual_action: flag unsupported or ambiguous filter paths
+    verify: each bidirectional relationship has an accepted use case
+
+  - id: PBI-020
+    requirement: CROSSFILTER is preferred over permanent bidirectional filtering where appropriate
+    source_id:
+      - MS-MODEL-04
+    category: Relationships
+    phase: assessment
+    severity: recommended
+    automatable: false
+    relationship_guard: true
+
+    detect: >-
+      Identify bidirectional relationships used primarily by a limited
+      set of measures or slicer scenarios.
+
+    manual_action: >-
+      Recommend measure-scoped CROSSFILTER usage where it would avoid
+      permanent bidirectional filtering.
+
+    verify: recommendation is recorded where applicable
 
   - id: PBI-021
-    requirement: Measure names reflect calculation & purpose
-    source_id: MS-COP-03
-    phase: iteration
+    requirement: Inactive relationships are not relied on for RLS propagation
+    source_id:
+      - MS-MODEL-03
+    category: Relationships
+    phase: assessment
     severity: critical
-    automatable: true
-    detect: measure name is cryptic / abbreviated
-    fix: measure_operations.Rename
-    verify: name descriptive; dependent measures still resolve
+    automatable: false
+    relationship_guard: true
+
+    detect: >-
+      Review security roles and filter paths to determine whether RLS
+      would require an inactive relationship.
+
+    manual_action: flag any unsupported RLS propagation design
+    verify: RLS propagation does not rely on inactive relationships
+
+  # ==========================================================
+  # NAMING
+  # PBI-022 through PBI-028
+  # ==========================================================
 
   - id: PBI-022
-    requirement: Column names unambiguous; avoid raw IDs/codes
-    source_id: MS-COP-03
+    requirement: Tables, columns, and measures use human-readable names
+    source_id:
+      - MS-NAME-01
+    category: Naming
     phase: iteration
-    severity: critical
+    severity: recommended
     automatable: true
-    relationship_guard: true          # renaming key columns can touch relationships
-    detect: column name is raw id/code/cryptic
-    fix: column_operations.Rename (engine updates relationship refs automatically)
-    verify: name readable AND relationship guard confirms links intact
+    scope:
+      - table
+      - column
+      - measure
+    requires_business_context: true
+
+    detect: >-
+      Identify visible object names containing technical prefixes,
+      technical suffixes, underscores, cryptic codes, or raw source names.
+
+    fix: >-
+      Rename only when the business-friendly replacement is supported
+      by the business glossary, existing model metadata, or an approved
+      change plan.
+
+    verify: >-
+      The resulting name is human-readable and all dependent expressions
+      and relationships remain valid.
 
   - id: PBI-023
-    requirement: No duplicate field names across tables
-    source_id: MS-COP-01
-    phase: assessment            # detected globally...
-    apply_phase: iteration       # ...resolved per-table
-    severity: critical
+    requirement: Naming conventions are consistent throughout the model
+    source_id:
+      - MS-NAME-01
+    category: Naming
+    phase: assessment
+    apply_phase: iteration
+    severity: recommended
+    automatable: true
+    requires_business_context: true
+
+    detect: >-
+      Identify inconsistent pluralization, capitalization, spacing,
+      terminology, and measure naming patterns.
+
+    fix: apply only an explicitly approved model-wide convention
+    verify: approved naming conventions are applied consistently
+
+  - id: PBI-024
+    requirement: Object names avoid excessive acronyms, abbreviations, and punctuation
+    source_id:
+      - MS-NAME-01
+    category: Naming
+    phase: iteration
+    severity: recommended
+    automatable: true
+    requires_business_context: true
+
+    detect: >-
+      Identify visible names containing unexplained acronyms,
+      excessive abbreviations, underscores, or punctuation.
+
+    fix: expand or simplify names using approved business terminology
+    verify: names are understandable without technical source knowledge
+
+  - id: PBI-025
+    requirement: Names reflect natural business language
+    source_id:
+      - MS-NAME-02
+    category: Naming
+    phase: iteration
+    severity: recommended
+    automatable: true
+    requires_business_context: true
+
+    context_sources:
+      - docs/context/business-glossary.md
+      - existing_object_descriptions
+      - approved_change_plan
+
+    detect: compare object names with approved business terminology
+    fix: rename objects only when the intended term is unambiguous
+    verify: resulting names match approved business language
+
+  - id: PBI-026
+    requirement: Descriptions distinguish similarly named fields
+    source_id:
+      - MS-NAME-01
+    category: Naming
+    phase: iteration
+    severity: recommended
+    automatable: true
+    scope:
+      - column
+      - measure
+
+    detect: >-
+      Find visible fields with identical or similar names whose intended
+      meaning, grain, unit, or usage differs.
+
+    fix: >-
+      Add or improve descriptions when renaming alone is insufficient
+      or would harm established business terminology.
+
+    verify: similar fields can be distinguished from their descriptions
+
+  - id: PBI-027
+    requirement: Technical names are supplemented with descriptions and synonyms
+    source_id:
+      - MS-NAME-02
+    category: Naming
+    phase: iteration
+    severity: recommended
+    automatable: partial
+
+    detect: identify technical object names that cannot safely be renamed
+
+    automated_action: >-
+      Add an approved business description when supported by available context.
+
+    manual_action: >-
+      Draft synonyms for manual application when the connected MCP version
+      does not expose synonym write operations.
+
+    verify: description exists and synonym recommendation is recorded
+
+  - id: PBI-028
+    requirement: Measures use English names
+    source_id:
+      - MS-NAME-01
+    category: Naming
+    phase: iteration
+    severity: recommended
+    automatable: true
+    requires_business_context: true
+    scope:
+      - measure
+
+    detect: identify visible measure names that are not in English
+    fix: rename only when an approved English business term is available
+    verify: visible measure names use approved English terminology
+
+  # ==========================================================
+  # MEASURES
+  # PBI-029 through PBI-030
+  # ==========================================================
+
+  - id: PBI-029
+    requirement: Copilot-generated measure descriptions are reviewed before publication
+    source_id:
+      - MS-MEASURE-01
+    category: Measures
+    phase: finalization
+    severity: recommended
+    automatable: false
+
+    detect: identify measure descriptions generated or rewritten with AI assistance
+
+    manual_action: >-
+      Require a human reviewer to confirm business meaning, calculation
+      interpretation, units, and intended usage before publication.
+
+    verify: review status is recorded for every affected measure
+
+  - id: PBI-030
+    requirement: Every visible measure has an accurate and helpful description
+    source_id:
+      - MS-MEASURE-01
+    category: Measures
+    phase: iteration
+    severity: recommended
+    automatable: true
+    scope:
+      - measure
+
+    context_sources:
+      - docs/context/business-glossary.md
+      - existing_model_metadata
+      - measure_dax
+      - approved_change_plan
+
+    detect:
+      visibility: "measure.isHidden == false"
+      missing: >-
+        measure.description is null
+        OR measure.description.trim() == ""
+        OR description length < 10
+      weak: >-
+        description only repeats the measure name
+        OR starts with generic boilerplate
+        OR does not explain business meaning
+
+    branches:
+      - id: missing_description
+        when: description is missing or too short
+        automatable: true
+
+        fix: >-
+          Write a description only from approved business context and
+          the measure definition. Put business meaning, preferred usage,
+          disambiguation, and units near the beginning.
+
+      - id: weak_description
+        when: description exists but is generic, repetitive, or ambiguous
+        automatable: true
+
+        fix: >-
+          Rewrite the description so that the opening summary communicates
+          the measure's business purpose. Do not merely restate the name.
+
+      - id: semantic_conflict
+        when: measure name, DAX, and description conflict
+        automatable: false
+        flag_only: true
+
+        action: >-
+          Do not edit the measure. Record the conflict in
+          docs/manual/name-description-conflicts.md for human resolution.
+
+    verify:
+      valid_description: >-
+        Every visible non-conflicting measure has a non-empty description
+        that communicates business meaning.
+      conflict_handling: >-
+        Every unresolved semantic conflict is recorded and the model object
+        remains unchanged.
+
+  # ==========================================================
+  # METADATA AND DESCRIPTIONS
+  # PBI-031 through PBI-032
+  # ==========================================================
+
+  - id: PBI-031
+    requirement: Visible tables and business-relevant columns have helpful descriptions
+    source_id:
+      - MS-META-01
+    category: Metadata and Descriptions
+    phase: iteration
+    severity: recommended
+    automatable: true
+    scope:
+      - table
+      - column
+
+    context_sources:
+      - docs/context/business-glossary.md
+      - existing_model_metadata
+      - approved_change_plan
+
+    detect: >-
+      Find visible tables and business-relevant visible columns with
+      missing, very short, generic, or name-repeating descriptions.
+
+    fix: >-
+      Add or improve descriptions using approved business context.
+      Put the most useful business meaning near the beginning, but do
+      not treat the preferred 200-character summary as a separate PBI rule.
+
+    verify: >-
+      Targeted visible tables and business-relevant columns have
+      accurate, concise, and useful descriptions.
+
+  - id: PBI-032
+    requirement: Data types, format strings, and data categories are accurate
+    source_id:
+      - MS-META-01
+    category: Metadata and Descriptions
+    phase: iteration
+    severity: recommended
+    automatable: true
+    scope:
+      - column
+      - measure
+
+    detect:
+      data_type: identify values whose semantic meaning conflicts with the model data type
+      format_string: identify numeric or date fields with missing or misleading formats
+      data_category: identify geographic, URL, or image fields without an appropriate category
+
+    fix:
+      data_type: >-
+        Change only when supported by the source model and explicitly
+        approved because data-type changes can affect calculations.
+      format_string: update .formatString
+      data_category: update .dataCategory
+
+    verify: >-
+      Updated metadata is semantically correct and dependent calculations
+      remain valid.
+
+  # ==========================================================
+  # DISCOVERABILITY
+  # PBI-033
+  # ==========================================================
+
+  - id: PBI-033
+    requirement: Important business tables and fields have synonyms
+    source_id:
+      - MS-DISC-01
+    category: Discoverability
+    phase: finalization
+    severity: recommended
+    automatable: false
+
+    detect: >-
+      Compare important table and field names with terms in the business
+      glossary and representative natural-language questions.
+
+    manual_action: >-
+      Produce a synonym proposal for manual application when the MCP
+      does not provide supported synonym write operations.
+
+    output: docs/manual/{model}/synonyms.md
+    verify: synonym recommendations are reviewed and recorded
+
+  # ==========================================================
+  # HIDDEN AND TECHNICAL FIELDS
+  # PBI-034
+  # ==========================================================
+
+  - id: PBI-034
+    requirement: Technical fields not intended for consumers are hidden
+    source_id:
+      - MS-HIDDEN-01
+    category: Hidden and Technical Fields
+    phase: iteration
+    severity: recommended
     automatable: true
     relationship_guard: true
-    detect: same field name appears in multiple tables (global scan)
-    fix: column_operations.Rename to disambiguate
-    verify: no cross-table name collisions remain
+    scope:
+      - column
+      - measure
 
-  # ---- Per-table hide technical fields (iteration, automatable) ----
-  - id: PBI-060
-    requirement: Technical relationship keys / raw IDs hidden
-    source_id: MS-COP-04
-    phase: iteration
+    detect:
+      columns: >-
+        Visible relationship keys, surrogate keys, raw identifiers,
+        sort-order helpers, and technical calculation columns that are
+        not intended for report consumers.
+      measures: >-
+        Visible helper or intermediate measures that are not intended
+        for direct consumer use.
+
+    fix:
+      columns: column_operations.Update -> isHidden = true
+      measures: measure_operations.Update -> isHidden = true
+
+    constraints:
+      - do not hide fields used directly by intended report consumers
+      - do not delete fields
+      - preserve sortByColumn bindings
+      - preserve relationships
+      - preserve dependent calculations
+
+    verify: >-
+      Approved technical objects are hidden and all relationships,
+      sort bindings, and dependent calculations remain valid.
+
+  # ==========================================================
+  # SECURITY
+  # PBI-035
+  # ==========================================================
+
+  - id: PBI-035
+    requirement: RLS is implemented and validated when restricted data exists
+    source_id:
+      - MS-SEC-01
+    category: Security
+    phase: assessment
+    severity: critical
+    automatable: false
+    conditional: true
+
+    detect: >-
+      Determine whether the semantic model contains data requiring
+      restricted access and enumerate existing security roles and permissions.
+
+    manual_action: >-
+      A human must implement or validate RLS, test representative users,
+      and confirm that Copilot responses respect effective permissions.
+
+    verify: >-
+      RLS test evidence is recorded, or the requirement is marked N/A
+      with a documented justification.
+
+  # ==========================================================
+  # AI PREPARATION
+  # PBI-036 through PBI-049
+  # ==========================================================
+
+  - id: PBI-036
+    requirement: Power BI Q&A is enabled before dependent Prep Data for AI features
+    source_id:
+      - MS-PREP-02
+      - MS-PREP-03
+    category: AI Preparation
+    phase: finalization
+    severity: critical
+    automatable: false
+
+    manual_action: confirm that Q&A is enabled for the semantic model
+    verify: Q&A prerequisite is recorded as satisfied
+
+  - id: PBI-037
+    requirement: A focused AI data schema is defined
+    source_id:
+      - MS-PREP-02
+    category: AI Preparation
+    phase: finalization
+    severity: critical
+    automatable: false
+
+    agent_output: >-
+      Produce a proposed AI data schema containing only fields relevant
+      to representative Copilot questions.
+
+    manual_action: apply and review the schema in Power BI
+    output: docs/manual/{model}/ai-data-schema.md
+    verify: applied schema is confirmed by a human
+
+  - id: PBI-038
+    requirement: Irrelevant and confusing fields are excluded from the AI data schema
+    source_id:
+      - MS-PREP-02
+    category: AI Preparation
+    phase: finalization
+    severity: recommended
+    automatable: false
+
+    agent_output: >-
+      List hidden, technical, confusing, ambiguous, and irrelevant fields
+      recommended for exclusion.
+
+    manual_action: review exclusions in the AI data schema
+    verify: exclusion decisions are recorded
+
+  - id: PBI-039
+    requirement: Verified answers cover common or nuanced business questions
+    source_id:
+      - MS-PREP-03
+    category: AI Preparation
+    phase: finalization
+    severity: recommended
+    automatable: false
+
+    agent_output: >-
+      Draft candidate verified answers for high-value, common, or nuanced
+      business questions.
+
+    output: docs/manual/{model}/verified-answers.md
+    manual_action: create and approve verified answers in Power BI
+    verify: verified-answer inventory is recorded
+
+  - id: PBI-040
+    requirement: Verified answers use representative trigger phrases
+    source_id:
+      - MS-PREP-03
+    category: AI Preparation
+    phase: finalization
+    severity: nice-to-have
+    automatable: false
+
+    agent_output: >-
+      Draft five to seven representative trigger phrases per answer
+      while respecting supported platform limits.
+
+    manual_action: review and apply trigger phrases
+    verify: trigger phrases are present and within supported limits
+
+  - id: PBI-041
+    requirement: Verified answers use supported visuals and connection modes
+    source_id:
+      - MS-PREP-03
+    category: AI Preparation
+    phase: finalization
+    severity: recommended
+    automatable: false
+
+    manual_action: >-
+      Confirm the visual type, semantic-model connection mode,
+      filters, and report context for each verified answer.
+
+    verify: compatibility check is recorded
+
+  - id: PBI-042
+    requirement: Verified-answer trigger behavior is tested without skill interference
+    source_id:
+      - MS-PREP-03
+    category: AI Preparation
+    phase: finalization
+    severity: recommended
+    automatable: false
+
+    manual_action: >-
+      During Desktop testing, use the skill selector where applicable
+      so unrelated Copilot authoring skills do not interfere.
+
+    verify: isolated trigger test result is recorded
+
+  - id: PBI-043
+    requirement: AI instructions define business context and terminology
+    source_id:
+      - MS-PREP-04
+    category: AI Preparation
+    phase: finalization
+    severity: critical
+    automatable: false
+
+    agent_output: >-
+      Draft model-level AI instructions using only approved business context,
+      terminology, interpretation rules, and limitations.
+
+    output: docs/manual/{model}/ai-instructions.md
+    manual_action: review and apply instructions in Power BI
+    verify: applied instructions are confirmed
+
+  - id: PBI-044
+    requirement: AI instructions map alternative terms to model concepts
+    source_id:
+      - MS-PREP-04
+      - MS-PREP-05
+    category: AI Preparation
+    phase: finalization
+    severity: recommended
+    automatable: false
+
+    agent_output: >-
+      Draft mappings between alternative business terms and model concepts
+      when those mappings cannot be inferred reliably from metadata.
+
+    manual_action: approve term mappings
+    verify: approved mappings are included in AI instructions
+
+  - id: PBI-045
+    requirement: AI instructions contain only model-wide valid guidance
+    source_id:
+      - MS-PREP-04
+    category: AI Preparation
+    phase: finalization
+    severity: recommended
+    automatable: false
+
+    manual_action: >-
+      Review every instruction to ensure that it remains valid across
+      the entire semantic model and is not limited to one report page
+      or temporary scenario.
+
+    verify: instruction scope review is recorded
+
+  - id: PBI-046
+    requirement: AI preparation follows the intended sequence
+    source_id:
+      - MS-PREP-05
+    category: AI Preparation
+    phase: finalization
+    severity: recommended
+    automatable: false
+
+    sequence:
+      - AI data schema
+      - verified answers
+      - AI instructions
+
+    manual_action: confirm completion order in the finalization report
+    verify: sequence is recorded
+
+  - id: PBI-047
+    requirement: Semantic model is marked as Approved for Copilot
+    source_id:
+      - MS-COP-04
+    category: AI Preparation
+    phase: finalization
+    severity: critical
+    automatable: false
+
+    prerequisite: AI preparation and validation are complete
+
+    manual_action: >-
+      Mark the semantic model as Approved for Copilot in Power BI
+      after preparation and review are complete.
+
+    verify: approval status and confirmation date are recorded
+
+  - id: PBI-048
+    requirement: Copilot indexing is reviewed and configured
+    source_id:
+      - MS-PREP-06
+    category: AI Preparation
+    phase: finalization
+    severity: recommended
+    automatable: false
+
+    manual_action: review Copilot indexing settings for the semantic model
+    verify: indexing decision is recorded
+
+  - id: PBI-049
+    requirement: Local Desktop Indexing is reviewed for applicable models
+    source_id:
+      - MS-PREP-06
+    category: AI Preparation
+    phase: finalization
+    severity: recommended
+    automatable: false
+    conditional: true
+
+    detect: determine whether the model uses DirectQuery or a live connection
+
+    manual_action: >-
+      Review Local Desktop Indexing on each applicable authoring machine;
+      mark N/A for Import models.
+
+    verify: setting is recorded or requirement is documented as N/A
+
+  # ==========================================================
+  # TESTING AND VALIDATION
+  # PBI-050 through PBI-055
+  # ==========================================================
+
+  - id: PBI-050
+    requirement: AI data schema is tested with included and excluded fields
+    source_id:
+      - MS-PREP-02
+    category: Testing and Validation
+    phase: finalization
+    severity: critical
+    automatable: false
+
+    agent_output: >-
+      Generate questions that should be answerable from included fields
+      and negative tests involving excluded fields.
+
+    output: docs/manual/{model}/testing-plan.md
+    manual_action: execute tests in Copilot
+    verify: expected and actual results are recorded
+
+  - id: PBI-051
+    requirement: Verified answers are tested with trigger phrases and filters
+    source_id:
+      - MS-PREP-03
+    category: Testing and Validation
+    phase: finalization
+    severity: critical
+    automatable: false
+
+    agent_output: >-
+      Generate representative trigger-phrase variants and supported
+      filter combinations for every verified answer.
+
+    manual_action: confirm that the intended approved visual is returned
+    verify: test results are recorded
+
+  - id: PBI-052
+    requirement: AI instructions are tested with representative business questions
+    source_id:
+      - MS-PREP-04
+    category: Testing and Validation
+    phase: finalization
+    severity: critical
+    automatable: false
+
+    agent_output: >-
+      Generate business-language questions that exercise terminology,
+      interpretation rules, and relevant model context.
+
+    manual_action: compare responses before and after instruction changes
+    verify: instruction impact is recorded
+
+  - id: PBI-053
+    requirement: Copilot pane is refreshed after schema or instruction changes
+    source_id:
+      - MS-PREP-02
+      - MS-PREP-04
+    category: Testing and Validation
+    phase: finalization
+    severity: recommended
+    automatable: false
+
+    manual_action: >-
+      Close and reopen the Copilot pane before evaluating updated behavior
+      after AI schema or instruction changes.
+
+    verify: refresh action is included in the test record
+
+  - id: PBI-054
+    requirement: Prep Data for AI changes are retested after publication
+    source_id:
+      - MS-PREP-01
+      - MS-PREP-02
+    category: Testing and Validation
+    phase: finalization
+    severity: recommended
+    automatable: false
+
+    manual_action: >-
+      Publish the model, allow configuration changes to propagate,
+      and repeat the representative Copilot tests in the Power BI service.
+
+    verify: post-publication test results are recorded
+
+  - id: PBI-055
+    requirement: Model integrity is verified after renames or structural changes
+    source_id:
+      - MS-MODEL-03
+    category: Testing and Validation
+    phase:
+      - iteration
+      - finalization
     severity: critical
     automatable: true
-    relationship_guard: true          # hiding must NOT break the relationship
-    detect: key/id columns with isHidden == false
-    fix: column_operations.Update -> isHidden = true
-    verify: column hidden AND relationship still active (hidden columns still join)
 
-  - id: PBI-061
-    requirement: Sort-order helper fields hidden
-    source_id: MS-COP-04
-    phase: iteration
-    severity: recommended
-    automatable: true
-    detect: sort-by helper columns visible
-    fix: column_operations.Update -> isHidden = true
-    verify: helper columns hidden; sortByColumn binding intact
+    detect: determine whether names, metadata, or model structure changed
 
-  - id: PBI-062
-    requirement: Intermediate calculation measures hidden
-    source_id: MS-COP-02
-    phase: iteration
-    severity: recommended
-    automatable: true
-    detect: helper/intermediate measures visible
-    fix: measure_operations.Update -> isHidden = true
-    verify: intermediate measures hidden; dependent measures still resolve
+    verify:
+      relationships: compare against docs/runs/{model}/relationships.lock
+      measures: validate dependent measure expressions
+      field_parameters: confirm referenced fields still resolve
+      sort_bindings: confirm sortByColumn bindings remain valid
+      security: confirm security-role definitions still resolve
+      objects: confirm renamed or updated objects can be re-read
 
-  # ---- Manual lane (finalization, NOT MCP) ----
-  - id: PBI-070
-    requirement: AI data schema (Simplify) defined
-    source_id: MS-PREP-02
-    phase: finalization
-    automatable: false
-    manual_action: agent produces list of fields to include/exclude for Copilot -> docs/manual/
+    on_failure:
+      iteration:
+        - rollback_transaction
+        - set_status=blocked
+      finalization:
+        - fail_model
+        - escalate
 
-  - id: PBI-071
-    requirement: Verified answers for common questions
-    source_id: MS-PREP-03
-    phase: finalization
-    automatable: false
-    manual_action: agent drafts trigger phrases (5-7) + intended answers -> docs/manual/
+# ------------------------------------------------------------
+# MANUAL LANE OUTPUTS
+# ------------------------------------------------------------
 
-  - id: PBI-072
-    requirement: AI instructions (business context, terminology, synonyms-as-terms)
-    source_id: MS-PREP-04
-    phase: finalization
-    automatable: false
-    note: synonyms are handled HERE (MCP exposes no synonym write)
-    manual_action: agent drafts AI-instructions text -> docs/manual/
+manual_lane:
+  output_root: docs/manual/{model}
 
-  - id: PBI-074
-    requirement: Model marked "Approved for Copilot"
-    source_id: MS-COP-04
-    phase: finalization
-    automatable: false
-    manual_action: human confirms in Power BI Service after all tables approved
+  deliverables:
+    - requirement_ids:
+        - PBI-033
+      file: synonyms.md
+      purpose: Proposed synonyms for business terms and model objects
 
-  - id: PBI-080..082
-    requirement: Copilot testing + HCAAT review
-    source_id: MS-PREP-01
-    phase: finalization
-    automatable: false
-    manual_action: agent supplies test question set + expected answers -> docs/manual/
+    - requirement_ids:
+        - PBI-035
+      file: security-validation.md
+      purpose: RLS applicability and human validation evidence
+
+    - requirement_ids:
+        - PBI-036
+        - PBI-037
+        - PBI-038
+        - PBI-039
+        - PBI-040
+        - PBI-041
+        - PBI-042
+        - PBI-043
+        - PBI-044
+        - PBI-045
+        - PBI-046
+        - PBI-047
+        - PBI-048
+        - PBI-049
+      file: ai-preparation.md
+      purpose: Manual Power BI AI preparation plan and confirmation checklist
+
+    - requirement_ids:
+        - PBI-050
+        - PBI-051
+        - PBI-052
+        - PBI-053
+        - PBI-054
+        - PBI-055
+      file: testing-plan.md
+      purpose: Copilot and model-integrity test plan
 
 # ------------------------------------------------------------
 # EXCLUSIONS
 # ------------------------------------------------------------
-excluded:
-  - id: PBI-065
-    requirement: RLS roles
-    reason: intentionally out of scope for this ruleset
-  - id: PBI-013, PBI-014
-    requirement: Relationship create/update
-    reason: relationships are an invariant, never edited (see relationship_invariant)
-  - id: PBI-050, PBI-051
-    requirement: Synonyms / Perspectives
-    reason: no MCP synonym write; synonyms folded into PBI-072 (AI instructions)
+
+excluded_automation:
+  - id: PBI-035
+    requirement: Row-Level Security implementation and user-context validation
+    reason: >-
+      Security changes require model-specific human approval and testing.
+      The agent may inspect and report security metadata but must not
+      automatically create or change RLS under this ruleset.
+
+  - ids:
+      - PBI-014
+      - PBI-015
+      - PBI-016
+      - PBI-017
+      - PBI-018
+      - PBI-019
+      - PBI-020
+      - PBI-021
+    requirement: Relationship design changes
+    reason: >-
+      Relationships are protected by the relationship invariant.
+      The agent assesses and reports relationship issues but does not
+      automatically edit cardinality, activity, or filter direction.
+
+  - id: PBI-033
+    requirement: Synonym authoring
+    reason: >-
+      Synonym write operations may not be available in the connected
+      MCP version. The agent produces a manual synonym proposal.
+
+  - ids:
+      - PBI-036
+      - PBI-037
+      - PBI-038
+      - PBI-039
+      - PBI-040
+      - PBI-041
+      - PBI-042
+      - PBI-043
+      - PBI-044
+      - PBI-045
+      - PBI-046
+      - PBI-047
+      - PBI-048
+      - PBI-049
+      - PBI-050
+      - PBI-051
+      - PBI-052
+      - PBI-053
+      - PBI-054
+    requirement: Power BI Prep Data for AI and Copilot service configuration
+    reason: >-
+      These capabilities are configured and validated manually in
+      Power BI Desktop or the Power BI service. The agent prepares
+      content, recommendations, and test plans.
+
+# ------------------------------------------------------------
+# VALIDATION
+# ------------------------------------------------------------
+
+validation:
+  requirement_ids:
+    allowed_range: PBI-001..PBI-055
+    require_zero_padding: true
+    reject_letter_suffixes: true
+    reject_unknown_ids: true
+
+    explicitly_rejected_examples:
+      - PBI-071a
+      - PBI-072a
+      - PBI-060
+      - PBI-065
+      - PBI-070
+      - PBI-074
+      - PBI-080
+      - PBI-081
+      - PBI-082
+
+  source_ids:
+    require_registry_entry: true
+    registry: docs/microsoft/references.md
+
+  pre_write:
+    - confirm_baseline_snapshot_exists
+    - confirm_change_plan_approved
+    - confirm_target_requirement_exists_in_matrix
+    - confirm_source_id_exists_in_registry
+    - confirm_business_context_available
+
+  post_write:
+    - re_read_modified_objects
+    - verify_targeted_requirements
+    - verify_relationship_invariant
+    - verify_dependent_expressions
+    - export_tmdl_snapshot
+
+# ------------------------------------------------------------
+# RUN LOG
+# ------------------------------------------------------------
+
+run_log:
+  path: docs/runs/{model}-{date}.md
+
+  required_fields:
+    - model
+    - workspace
+    - baseline_commit
+    - baseline_snapshot
+    - requirement_ids_assessed
+    - requirement_ids_changed
+    - source_ids_used
+    - objects_changed
+    - verification_results
+    - relationship_integrity_result
+    - manual_items
+    - unresolved_conflicts
+    - final_status
