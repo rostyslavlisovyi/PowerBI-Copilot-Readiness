@@ -30,8 +30,6 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 
 ## Modeling and Schema
 
-### Modeling and Schema
-
 | ID | Requirement | Evidence | Source |
 |----|-------------|----------|--------|
 | PBI-010 | Design semantic models using a star schema. | Recommended | MS-MODEL-01 |
@@ -40,14 +38,25 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 | PBI-013 | Maintain a consistent grain within each fact table. | Recommended | MS-MODEL-01 |
 | PBI-014 | Configure one-to-many relationships from dimension tables to fact tables. | Recommended | MS-MODEL-01 |
 
+## Relationships
+
+| PBI-015 | Define active relationships whenever possible. | Recommended | MS-MODEL-03 |
+| PBI-016 | Duplicate role-playing dimension tables instead of relying on inactive relationships when multiple active filter paths are required. | Recommended | MS-MODEL-03 |
+| PBI-017 | Use inactive relationships only for specific calculation scenarios together with USERELATIONSHIP(). | Recommended | MS-MODEL-03 |
+| PBI-018 | Minimize the use of bi-directional relationships. | Recommended | MS-MODEL-04 |
+| PBI-019 | Use bi-directional filtering only when required for supported modeling scenarios. | Recommended | MS-MODEL-04 |
+| PBI-020 | Prefer CROSSFILTER() in DAX over permanent bi-directional relationships for slicer filtering scenarios. | Recommended | MS-MODEL-04 |
+| PBI-021 | Do not rely on inactive relationships for Row-Level Security propagation. | Direct | MS-MODEL-03 |
+
 ## Naming
 
-| ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
-|---|---|---|---|---|---|---|---|
-| PBI-020 | Tables use human-readable business names without unnecessary technical suffixes | Naming | MS-COP-02 | Direct | 🔴 | Pending | Avoid names such as `Customer Table` |
-| PBI-021 | Measure names reflect their calculation and business purpose | Naming | MS-COP-03 | Direct | 🔴 | Pending | Avoid cryptic abbreviations |
-| PBI-022 | Column names are unambiguous and do not expose unnecessary raw IDs or codes | Naming | MS-COP-03 | Direct | 🔴 | Pending | |
-| PBI-023 | Duplicate field names across tables are disambiguated | Naming | MS-COP-01 | Direct | 🔴 | Pending | Example: `Customer[Name]` versus `Store[Name]` |
+| PBI-022 | Use human-readable names for tables, columns, and measures. | Recommended | MS-NAME-01 |
+| PBI-023 | Use consistent naming conventions throughout the semantic model. | Recommended | MS-NAME-01 |
+| PBI-024 | Avoid excessive acronyms, abbreviations, and punctuation in object names. | Recommended | MS-NAME-01 |
+| PBI-025 | Use business-friendly names that reflect how users naturally refer to the data. | Recommended | MS-NAME-02 |
+| PBI-026 | Provide descriptions to distinguish similarly named fields when renaming is insufficient. | Recommended | MS-NAME-01 |
+| PBI-027 | Add descriptions and synonyms when technical object names cannot be changed. | Recommended | MS-NAME-02 |
+| PBI-028 | Name measures in English to improve Copilot understanding. | Recommended | MS-NAME-01 |
 
 ## Measures
 
