@@ -62,6 +62,10 @@ change is diffable in git.
 
 ## Core workflow (per model)
 
+Reusable prompt templates for each phase below are in
+[`docs/prompts/`](../docs/prompts/README.md) — use those instead of
+re-deriving a prompt from scratch for each new model.
+
 1. **Connect** (above).
 2. **Snapshot:** ExportTMDL → commit as baseline.
 3. **Audit (READ only):** enumerate tables/columns/measures/relationships/roles;

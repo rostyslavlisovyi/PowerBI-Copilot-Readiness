@@ -17,6 +17,13 @@ folder on `main`, not in the branch.
 under `docs/manual/` if it has manual-lane deliverables) that persists across
 every run for that model.
 
+**Prompt templates:** don't write a new Copilot prompt from scratch for each
+task. Use [`docs/prompts/`](docs/prompts/README.md) — `audit-prompt.md` for
+audit runs, `apply-prompt.md` for applying an approved plan,
+`manual-lane-prompt.md` for manual-lane deliverables. Fill in the
+placeholders and add a task entry here first (the prompts assume the task
+entry already exists).
+
 ## TASK-001 -- Baseline assessment of test semantic model
 
 **Status:** Complete (v3 merged, PR #6). Result: audit found 20 `Not Met`
