@@ -20,6 +20,6 @@
 | Report Session | One Power BI report opening by a user | Primary Power BI adoption metric | count | session | Total Report Sessions |
 | WoW / MoM Change | Change vs same day/period one week/month earlier | Trend context on KPI cards | count / % | week-over-week, month-over-month | DAU WoW Change; MAU MoM Change |
 | Data Refresh | Timestamp of last semantic model data update | Show data freshness to users | datetime | last refresh | Last Data Refresh |
-| ? Country | ? | ? | ? | ? | ? |
-| ? Platform | ? (Mobile / Web?) | ? single-select | text | ? | ? |
-| ? User Role | ? | ? | ? | ? | ? |
+| Country | Country where the event was recorded, as reported by the user's device to the analytics (PostHog) server. Reflects the device's apparent location -- actual physical location, or a masked/VPN location if the user is using a VPN | Device-reported, not verified against CRM instance region; treat as approximate geography, not an authoritative user/company location | text | user country, event country, geographic location | Application Usage Events[Country]; Power BI Usage Events[Country] |
+| Platform | Client platform that generated the event: Web (browser-based Proxima CRM) or Mobile (Flutter app installed on a phone/tablet) | Single-select per event; aligns with the Web/Mobile split already used for Application Version | text (Web / Mobile) | client platform, device type, app platform | Platform; Application Version |
+| User Role | The user's role within the CRM system -- a named permission group for a set of users (e.g. Administrator, or a regional role such as "РМ Україна" / Regional Manager Ukraine) | Role names are CRM-specific (organization-defined), not a generic admin/user/viewer scale; use for segmenting usage by permission tier or regional responsibility | text (role name) | CRM role, permission group, job role | User Role |
