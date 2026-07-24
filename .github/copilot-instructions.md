@@ -76,33 +76,52 @@ change is diffable in git.
 
 ## Automatable lane — requirement → MCP operation
 
+IDs below match the current `docs/microsoft/requirements_matrix.md` (PBI-001..055) and
+`rules.yaml` `automatable: true` flags. Do not use any PBI-06x/07x/08x identifiers —
+`rules.yaml` explicitly rejects them as historical validation fixtures.
+
 | Requirement (PBI-*) | Tool | Operation / property |
 |---|---|---|
-| PBI-031 / 040 / 041 / 042 descriptions | table/column/measure_operations | Update `.description` (key info in first 200 chars) |
-| Format strings | column/measure_operations | Update `.formatString` |
-| Display folders | measure_operations | Update `.displayFolder` |
-| PBI-060 / 061 / 062 hide technical fields | table/column/measure_operations | Update `.isHidden = true` |
-| PBI-020..023 naming | table/column/measure_operations | Rename |
-| PBI-045 data category | column_operations | Update `.dataCategory` |
-| PBI-013 / 014 relationships | relationship_operations | Create / Update / Activate / Deactivate |
-| PBI-017 date table / hierarchies | table_operations MarkAsDateTable; user_hierarchy_operations | designate date table; build hierarchies |
-| PBI-065 RLS | security_role_operations | Create + CreatePermissions |
-| PBI-043 calc-group docs | calculation_group_operations (verify) else column description | document logic |
-| Multi-language (optional) | culture_operations + object_translation_operations | translations |
+| PBI-022 / 023 / 024 / 025 / 028 naming | table/column/measure_operations | Rename |
+| PBI-026 disambiguating descriptions | table/column/measure_operations | Update `.description` |
+| PBI-030 / 031 descriptions | table/column/measure_operations | Update `.description` (front-load business meaning in first 200 chars per MS-COP-03 / D-006) |
+| PBI-032 data types, format strings, data categories | column/measure_operations | Update `.formatString`, `.dataCategory` |
+| Display folders (implementation detail of PBI-030/031 organization, no dedicated PBI id) | measure_operations | Update `.displayFolder` |
+| PBI-034 hide technical fields | table/column/measure_operations | Update `.isHidden = true` |
+| PBI-055 model integrity re-verification | read-only re-query of modified/dependent objects | Confirm relationships, measures, field parameters, sort bindings, security still resolve |
+
+**Not automatable — assessment/report only:**
+
+- PBI-010–021 (modeling & relationships): relationships are a protected invariant
+  (`rules.yaml` `relationship_invariant`, `excluded_automation`). The agent never
+  creates, updates, activates, deactivates, or changes cardinality/cross-filter
+  direction. It assesses and reports only.
+- Date table designation and hierarchies, and calculation-group documentation, are
+  not yet assigned a `PBI-*` id in the current matrix (`MS-MODEL-13` and `MS-MODEL-09`
+  are `Planned` sources). Do not automate these until they are added to
+  `requirements_matrix.md` with an evidence classification and human review.
+- Multi-language/translation support is not yet in the matrix either; propose it as
+  a new project requirement before using `culture_operations` / `object_translation_operations`.
 
 ---
 
 ## Manual lane — Power BI Service, NOT the MCP
 
-The agent GENERATES the content and writes it under `docs/` for a human to apply:
+The agent GENERATES the content and writes it under `docs/` for a human to apply.
+IDs match `docs/microsoft/requirements_matrix.md` (PBI-001..055).
 
 | Requirement | Deliverable the agent produces |
 |---|---|
-| PBI-070 AI data schema (Simplify) | list of fields to include/exclude for Copilot |
-| PBI-071 / 071a Verified answers | trigger phrases + intended answer per key question |
-| PBI-072 / 072a AI instructions | model AI-instructions text incl. term mappings (this is where "synonyms" are handled — the MCP exposes no synonym write) |
-| PBI-074 Approved for Copilot | checklist confirmation only |
-| PBI-080..082 Copilot testing + HCAAT | test question set + expected answers |
+| PBI-001–009 Prerequisites | Recorded confirmation of tenant/capacity/region/access settings (admin-provided; not detectable via MCP) |
+| PBI-010–021 Modeling & Relationships | Assessment findings and recommendations only — never auto-applied (relationship invariant) |
+| PBI-027 / 033 Synonyms | Proposed synonym list (`docs/manual/{model}/synonyms.md`) — the MCP exposes no synonym write |
+| PBI-035 RLS | Security validation evidence (`docs/manual/{model}/security-validation.md`) — excluded from automation |
+| PBI-036–038 AI data schema (Simplify) | List of fields to include/exclude for Copilot |
+| PBI-039–042 Verified answers | Trigger phrases + intended answer per key question |
+| PBI-043–046 AI instructions | Model AI-instructions text incl. term mappings (this is where "synonyms" are handled — the MCP exposes no synonym write) |
+| PBI-047 Approved for Copilot | Checklist confirmation only |
+| PBI-048 / 049 Copilot indexing | Indexing review notes (Service/Desktop settings) |
+| PBI-050–054 Testing | Test question set + expected answers, retest plan |
 
 ---
 
