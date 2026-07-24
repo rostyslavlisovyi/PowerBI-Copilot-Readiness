@@ -72,6 +72,13 @@ change is diffable in git.
    only mark a requirement `Manual` outright when its evidence genuinely
    cannot be read via MCP at all (e.g. tenant/capacity settings, PBI-001–009).
 4. **Plan:** list concrete changes (object, property, new value, `PBI-*`, `Source_ID`).
+   The Automatable lane table sometimes groups several `PBI-*` ids in one row
+   (e.g. "PBI-022 / 023 / 024 / 025 / 028 naming") because they share an
+   operation. When summarizing which ids the plan covers, filter to only the
+   ids that are individually `Not Met` in the audit — do not include a
+   sibling id from the same row just because it shares a row with a `Not Met`
+   id. `PBI-055` is a verification gate, not a plan item; list it separately
+   from the `Not Met` ids it will re-verify.
 5. **Apply (WRITE, in transaction, bulk):** use `*_operations` Update with
    `definitions` arrays. Batch by object type.
 6. **Verify:** re-read modified objects; confirm each targeted `PBI-*` now passes.

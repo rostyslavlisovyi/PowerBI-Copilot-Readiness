@@ -63,3 +63,15 @@ general principle, not specific to synonyms: a requirement is only marked
 `Manual` outright when its evidence cannot be read via MCP at all (e.g.
 tenant/capacity settings, PBI-001–009), not merely because remediation requires
 a human step.
+
+## D-010 — PBI-056 scope stays table/column/measure only; file/report title is out of scope
+TASK-001 v2 found that the typo that originally motivated PBI-056
+("Analitics") lives in the Desktop connection/file title, not in any visible
+table, column, or measure. Decision: keep PBI-056 scoped exactly as written
+(`table`, `column`, `measure`, and their descriptions) rather than expanding it
+to cover file/report titles, because that title is not part of the semantic
+model and is not readable via the Power BI Modeling MCP at all — there is
+nothing for the automatable lane to detect or fix there. If a future need
+arises to check report/file-level naming, it must be a separate requirement
+with its own detection mechanism (outside the MCP), not a PBI-056 scope
+expansion.

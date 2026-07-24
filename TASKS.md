@@ -19,35 +19,48 @@ every run for that model.
 
 ## TASK-001 -- Baseline assessment of test semantic model
 
-**Status:** Re-run (v2) — original run (PR #4) was reverted; this run adds two
-audit-quality fixes discovered in v1 (see notes below). Delete the old
-`assessment/user-usage-analytics-2026-07-24` branch (local + remote) before
-starting, or use `-v2` suffix if the old branch can't be deleted.
+**Status:** Re-run (v3) — v2's audit and plan were substantively correct
+(read the current `Synonyms` state, ran the PBI-056 spelling pass, result:
+Met) but the plan summary incorrectly listed `PBI-028` (status `Met`) as if
+it were in scope, because it shares an Automatable-lane table row with
+`PBI-022/023/024/025` (all `Not Met`). This is now clarified in
+`.github/copilot-instructions.md` Core workflow step 4. Delete the old
+`assessment/user-usage-analytics-2026-07-24-v2` branch (local + remote)
+before starting.
 **Owner:** GitHub Copilot (VS Code) + Power BI Modeling MCP
 **Model:** User Usage Analytics (Power BI Desktop file) -- slug `user-usage-analytics`
-**Branch:** `assessment/user-usage-analytics-2026-07-24-v2`
+**Branch:** `assessment/user-usage-analytics-2026-07-24-v3`
 
-**What changed since v1:** (1) PBI-027/033 audits must read the model's
+**What changed since v2:** Clarified that when an Automatable-lane row groups
+several `PBI-*` ids together (e.g. "PBI-022 / 023 / 024 / 025 / 028"), the
+plan's list of in-scope ids must be filtered to only the ids that are
+individually `Not Met` — a `Met` sibling id in the same row must NOT appear
+in the plan's scope list. `PBI-055` remains listed separately as a
+verification gate, not a plan item.
+
+**What changed since v1 (for reference):** (1) PBI-027/033 audits must read the model's
 current `Synonyms` property via MCP before drafting proposals, instead of
 assuming none exist (see `rules.yaml` `read_existing_state`, DECISIONS.md
 D-009). (2) New requirement `PBI-056` added: spell-check all visible names and
 descriptions (DECISIONS.md D-008) — v1 surfaced a typo ("Analitics") in the
-model's own connection name that a spelling pass should have caught and
-reported.
+model's own connection name. v2 confirmed this typo lives in the Desktop
+connection/file title, out of PBI-056's table/column/measure scope — this
+stays as a documented, accepted scope boundary (DECISIONS.md D-010), not a bug
+to fix in v3.
 
 **Goal:** Run the read-only Core workflow steps 1-4 from
 `.github/copilot-instructions.md` (Connect -> Snapshot -> Audit -> Plan) against a
 test semantic model. Produce a findings report before any write happens.
 
 **Steps:**
-1. Create and switch to branch `assessment/user-usage-analytics-2026-07-24-v2`.
+1. Create and switch to branch `assessment/user-usage-analytics-2026-07-24-v3`.
 2. Connect to the test model: `Connect to 'User Usage Analytics' in Power BI Desktop`
    (see "Connection protocol" in `.github/copilot-instructions.md`). The file
    must be open in Power BI Desktop first.
 3. Export TMDL and commit it as the baseline snapshot
-   (`docs/runs/user-usage-analytics/2026-07-24-v2-baseline/`).
+   (`docs/runs/user-usage-analytics/2026-07-24-v3-baseline/`).
 4. Audit the model against every requirement in
-   `docs/microsoft/requirements_matrix.md` (now 56 requirements, including
+   `docs/microsoft/requirements_matrix.md` (56 requirements, including
    `PBI-056`), using `rules.yaml` for the exact pass/fail check per rule. Do
    not skip Prerequisites (PBI-001-009) -- record them as Manual/Not-applicable
    if they can't be checked via MCP. For PBI-027/033, read current `Synonyms`
@@ -55,10 +68,15 @@ test semantic model. Produce a findings report before any write happens.
 5. Produce an audit table keyed by `PBI-*`: Met / Not Met / Manual / Blocked,
    with a one-line reason for each Not Met.
 6. From "Not Met" results, build a change plan restricted to the
-   **Automatable lane** table in `.github/copilot-instructions.md`. Do NOT
-   apply anything yet -- stop after the plan and post it in
-   `docs/runs/user-usage-analytics/2026-07-24-v2.md` for human review.
-7. Log approximate token cost in `docs/metrics/token-usage.md` in the same PR.
+   **Automatable lane** table in `.github/copilot-instructions.md`. When a
+   table row groups multiple `PBI-*` ids, include in the plan's scope list
+   ONLY the ids that are individually `Not Met` from step 5 — double-check
+   this before writing the summary line. Do NOT apply anything yet -- stop
+   after the plan and post it in
+   `docs/runs/user-usage-analytics/2026-07-24-v3.md` for human review.
+7. Log approximate token cost as a new row in the existing
+   `docs/metrics/token-usage.md` (append to it — do not create a new file or
+   change its existing schema).
 8. Commit and open a PR into `main`. Wait for explicit human approval before
    proceeding to Apply/Verify (Core workflow steps 5-8, in a new
    `fix/user-usage-analytics-<date>` branch as TASK-002).
