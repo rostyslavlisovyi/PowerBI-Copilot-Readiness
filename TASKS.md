@@ -19,14 +19,10 @@ every run for that model.
 
 ## TASK-001 -- Baseline assessment of test semantic model
 
-**Status:** Re-run (v3) — v2's audit and plan were substantively correct
-(read the current `Synonyms` state, ran the PBI-056 spelling pass, result:
-Met) but the plan summary incorrectly listed `PBI-028` (status `Met`) as if
-it were in scope, because it shares an Automatable-lane table row with
-`PBI-022/023/024/025` (all `Not Met`). This is now clarified in
-`.github/copilot-instructions.md` Core workflow step 4. Delete the old
-`assessment/user-usage-analytics-2026-07-24-v2` branch (local + remote)
-before starting.
+**Status:** Complete (v3 merged, PR #6). Result: audit found 20 `Not Met`
+requirements with an automatable-lane fix; see
+`docs/runs/user-usage-analytics/2026-07-24-v3.md` for the approved plan
+now executed as TASK-002.
 **Owner:** GitHub Copilot (VS Code) + Power BI Modeling MCP
 **Model:** User Usage Analytics (Power BI Desktop file) -- slug `user-usage-analytics`
 **Branch:** `assessment/user-usage-analytics-2026-07-24-v3`
@@ -85,7 +81,74 @@ test semantic model. Produce a findings report before any write happens.
 any RLS change, any Prep-for-AI / Approved-for-Copilot change (Manual lane --
 produces a document, not a model change).
 
-**Next task (not started):** TASK-002 -- apply approved automatable changes
-from TASK-001's plan, in transaction, then re-verify and update
-`requirements_matrix.md` `Status` column from `Pending` to `Met` per
-requirement.
+## TASK-002 -- Apply the approved TASK-001 v3 plan
+
+**Status:** Approved, ready to start
+**Owner:** GitHub Copilot (VS Code) + Power BI Modeling MCP
+**Model:** User Usage Analytics (Power BI Desktop file) -- slug `user-usage-analytics`
+**Branch:** `fix/user-usage-analytics-2026-07-24`
+**Source plan:** `docs/runs/user-usage-analytics/2026-07-24-v3.md`,
+sections 1-6 (section 7 is the PBI-055 verification gate, always applied,
+not a separate item).
+
+**Approved scope (human sign-off recorded here):**
+1. **Naming (PBI-022/023/024/025):** `_Measures` -> `Measures`;
+   `PostHog Application Usage Events[session_count]` -> `Session Count`.
+   No other renames -- do not extend beyond what section 1 of the v3 plan
+   names explicitly.
+2. **Disambiguating descriptions (PBI-026):** add descriptions to the 6
+   named identity/key fields in section 2 of the v3 plan.
+3. **Measure descriptions (PBI-030):** add descriptions to the 10 named
+   measures in section 3, plus the missing display folder for
+   `WAU Trend Previous Week`.
+4. **Column/table descriptions (PBI-031):** add descriptions to the 24
+   named columns in section 4.
+5. **Data categories (PBI-032):** set `Country`/`City` data categories on
+   the 4 named geographic fields in section 5.
+6. **Hide technical fields (PBI-034) -- SCOPE LIMITED:** hide only
+   `PostHog Application Usage Events[session_count]` (already renamed to
+   `Session Count` per item 1). Do **NOT** hide any other "key/helper"
+   field from section 6's vague "join aids" language -- that part of the
+   v3 plan was not specific enough to approve; propose a concrete list as
+   a separate future task if desired.
+7. **Verification gate (PBI-055):** required after every batch, per
+   `.github/copilot-instructions.md` Non-negotiable safety rule #2 and #5.
+
+**Explicitly out of scope (unchanged from TASK-001):** any relationship
+edit, any RLS change, any Prep-for-AI / Verified Answers / AI Instructions
+change, and any hide action beyond the one field named above.
+
+**Steps (Core workflow steps 5-8 from `.github/copilot-instructions.md`):**
+1. Create and switch to branch `fix/user-usage-analytics-2026-07-24`.
+2. Re-connect to the model; confirm the baseline snapshot in
+   `docs/runs/user-usage-analytics/2026-07-24-v3-baseline/` still matches
+   the current model state before writing anything (if it doesn't, stop
+   and report the drift instead of proceeding).
+3. Apply the approved scope above inside a single `transaction_operations`
+   Begin -> apply -> verify -> Commit. Use bulk `*_operations` Update with
+   `definitions` arrays, batched by object type (rename batch, description
+   batch, format/data-category batch, hidden-flag batch). If any step's
+   verification fails, Rollback the whole transaction and report -- do not
+   partially apply.
+4. Verify (PBI-055): re-read every modified object; confirm relationships,
+   dependent measures, field parameters, sort bindings, and security still
+   resolve.
+5. Export TMDL again -> commit as the post-change snapshot
+   (`docs/runs/user-usage-analytics/2026-07-24-fix-after/`). The git diff
+   between the v3 baseline and this snapshot is the change record.
+6. Write a run report to `docs/runs/user-usage-analytics/2026-07-24-fix.md`:
+   what changed per `PBI-*`, verification result, anything skipped from the
+   approved scope and why.
+7. Update `docs/microsoft/requirements_matrix.md`: change `Status` from
+   `Pending` to `Met` for PBI-022, 023, 024, 025, 026, 030, 031, 032, 034,
+   055 only (the ones actually changed/reverified here). Recompute the
+   Requirement Summary table's Met/Pending counts.
+8. Append one new row to the existing `docs/metrics/token-usage.md` (same
+   schema -- do not create a new file).
+9. Commit and open a PR into `main`. Wait for human review before merging
+   (this PR contains actual model changes, review more carefully than the
+   read-only audit PRs).
+
+**Next task (not started):** TASK-003 -- Manual-lane deliverables (synonyms
+proposal, RLS security-validation evidence) for `user-usage-analytics`,
+per `docs/manual/{model}/` conventions in `.github/copilot-instructions.md`.
