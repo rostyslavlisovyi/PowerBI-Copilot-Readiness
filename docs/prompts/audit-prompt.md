@@ -45,11 +45,17 @@ Execute a read-only baseline assessment for model "{MODEL_NAME}"
    separately, not as a plan item. Do NOT apply anything yet -- stop after
    the plan.
 7. Write the result (audit + plan) to docs/runs/{MODEL_SLUG}/{DATE}.md
-8. Append one new row to the EXISTING docs/metrics/token-usage.md (same
+8. Sync any requirement found `Met` purely by observation (no automatable
+   fix needed, e.g. star schema already correct, measures already English)
+   into `docs/microsoft/requirements_matrix.md`'s `Status` column now --
+   don't wait for an apply/fix task to do this. Only requirements the audit
+   found `Not Met` stay `Pending` here (they'll update after an apply task).
+   Recompute the Requirement Summary table.
+9. Append one new row to the EXISTING docs/metrics/token-usage.md (same
    schema as the current rows there) -- do not create a new file or change
    its schema. If the file appears missing, re-check main before assuming
    it doesn't exist.
-9. Commit and open a PR into main.
+10. Commit and open a PR into main.
 
 Do not perform any write operations. Do not touch relationships. This is a
 read-only step. Stop and wait for my approval of the plan.

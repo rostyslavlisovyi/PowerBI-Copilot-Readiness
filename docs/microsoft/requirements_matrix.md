@@ -55,23 +55,23 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 
 | ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
 |---|---|---|---|---|---|---|---|
-| PBI-010 | Design semantic models using a star schema | Modeling and Schema | MS-MODEL-01 | Recommended | 🟡 | Pending | Assess the overall model structure and document material deviations |
-| PBI-011 | Separate fact and dimension tables | Modeling and Schema | MS-MODEL-01 | Recommended | 🟡 | Pending | Classify relevant tables as fact, dimension, bridge, or technical |
-| PBI-012 | Do not mix fact and dimension data within the same table | Modeling and Schema | MS-MODEL-01 | Recommended | 🟡 | Pending | Document exceptions where mixed responsibilities cannot yet be refactored |
-| PBI-013 | Maintain a consistent grain within each fact table | Modeling and Schema | MS-MODEL-01 | Recommended | 🟡 | Pending | Record the expected grain of each assessed fact table |
-| PBI-014 | Configure one-to-many relationships from dimension tables to fact tables | Modeling and Schema | MS-MODEL-01 | Recommended | 🟡 | Pending | Relationship changes require explicit human approval under the relationship invariant in `rules.yaml` |
+| PBI-010 | Design semantic models using a star schema | Modeling and Schema | MS-MODEL-01 | Recommended | 🟡 | Met | Found consistently Met in TASK-001 v1-v3 audits (`docs/runs/user-usage-analytics/2026-07-24-v3.md`): clear fact/dimension separation |
+| PBI-011 | Separate fact and dimension tables | Modeling and Schema | MS-MODEL-01 | Recommended | 🟡 | Met | Found consistently Met in TASK-001 v1-v3 audits: fact and dimension/reference tables structurally separated |
+| PBI-012 | Do not mix fact and dimension data within the same table | Modeling and Schema | MS-MODEL-01 | Recommended | 🟡 | Met | Found consistently Met in TASK-001 v1-v3 audits: no mixed-responsibility table identified |
+| PBI-013 | Maintain a consistent grain within each fact table | Modeling and Schema | MS-MODEL-01 | Recommended | 🟡 | Met | Found consistently Met in TASK-001 v1-v3 audits: consistent event-level grain observed |
+| PBI-014 | Configure one-to-many relationships from dimension tables to fact tables | Modeling and Schema | MS-MODEL-01 | Recommended | 🟡 | Met | Found consistently Met in TASK-001 v1-v3 audits: relationships are many-to-one from facts to dimensions; protected by relationship invariant, never auto-applied |
 
 ## Relationships
 
 | ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
 |---|---|---|---|---|---|---|---|
-| PBI-015 | Define active relationships whenever possible | Relationships | MS-MODEL-03 | Recommended | 🟡 | Pending | Review and justify each inactive relationship |
-| PBI-016 | Duplicate role-playing dimension tables instead of relying on inactive relationships when multiple active filter paths are required | Relationships | MS-MODEL-03 | Recommended | 🟡 | Pending | Assess dimensions that serve multiple semantic roles |
-| PBI-017 | Use inactive relationships only for specific calculation scenarios together with `USERELATIONSHIP()` | Relationships | MS-MODEL-03 | Recommended | 🟡 | Pending | Confirm that each inactive relationship has a documented calculation use |
+| PBI-015 | Define active relationships whenever possible | Relationships | MS-MODEL-03 | Recommended | 🟡 | Met | Found consistently Met in TASK-001 v1-v3 audits: all 12 relationships are active, no inactive backlog |
+| PBI-016 | Duplicate role-playing dimension tables instead of relying on inactive relationships when multiple active filter paths are required | Relationships | MS-MODEL-03 | Recommended | 🟡 | Met | Found consistently Met in TASK-001 v1-v3 audits: role-playing date handling uses separate local date tables |
+| PBI-017 | Use inactive relationships only for specific calculation scenarios together with `USERELATIONSHIP()` | Relationships | MS-MODEL-03 | Recommended | 🟡 | Met | Found consistently Met in TASK-001 v1-v3 audits: no inactive relationships exist, so no unsupported usage was found |
 | PBI-018 | Minimize the use of bi-directional relationships | Relationships | MS-MODEL-04 | Recommended | 🟡 | Pending | Document the reason for each bi-directional relationship |
 | PBI-019 | Use bi-directional filtering only when required for supported modeling scenarios | Relationships | MS-MODEL-04 | Recommended | 🟡 | Pending | Flag ambiguous or unsupported filter paths |
 | PBI-020 | Prefer `CROSSFILTER()` in DAX over permanent bi-directional relationships for slicer filtering scenarios | Relationships | MS-MODEL-04 | Recommended | 🟡 | Pending | Review whether filter-direction changes can be limited to individual calculations |
-| PBI-021 | Do not rely on inactive relationships for Row-Level Security propagation | Relationships | MS-MODEL-03 | Direct | 🔴 | Pending | Validate RLS filter paths independently of inactive relationships |
+| PBI-021 | Do not rely on inactive relationships for Row-Level Security propagation | Relationships | MS-MODEL-03 | Direct | 🔴 | Met | Found consistently Met in TASK-001 v1-v3 audits: no inactive relationships exist, so RLS cannot depend on inactive paths |
 
 ## Naming
 
@@ -83,7 +83,7 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 | PBI-025 | Use business-friendly names that reflect how users naturally refer to the data | Naming | MS-NAME-02 | Recommended | 🟡 | Pending | Use approved terminology from the business glossary or other validated context |
 | PBI-026 | Provide descriptions to distinguish similarly named fields when renaming is insufficient | Naming | MS-NAME-01 | Recommended | 🟡 | Pending | Include differences in meaning, grain, unit, or intended use |
 | PBI-027 | Add descriptions and synonyms when technical object names cannot be changed | Naming | MS-NAME-02 | Recommended | 🟡 | Pending | Synonyms may require manual application when the MCP does not support writes |
-| PBI-028 | Name measures in English to improve Copilot understanding | Naming | MS-NAME-01 | Recommended | 🟡 | Pending | Rename only when an approved English business term is available |
+| PBI-028 | Name measures in English to improve Copilot understanding | Naming | MS-NAME-01 | Recommended | 🟡 | Met | Found consistently Met in TASK-001 v1-v3 audits: visible measure names are already English and understandable |
 
 ## Measures
 
@@ -146,16 +146,16 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 | PBI-053 | The Copilot pane is refreshed after changes to AI data schemas or AI instructions | Testing and Validation | MS-PREP-02, MS-PREP-04 | Direct | 🟡 | Pending | Close and reopen the pane before evaluating updated behavior in Power BI Desktop |
 | PBI-054 | Prep Data for AI changes are retested after publication to the Power BI service | Testing and Validation | MS-PREP-01, MS-PREP-02 | Recommended | 🟡 | Pending | Allow configuration changes to propagate before repeating representative tests |
 | PBI-055 | Model integrity is verified after renames or structural changes | Testing and Validation | MS-MODEL-03 | Derived | 🔴 | Pending | Check relationships, RLS, field parameters, sort bindings, expressions, and dependent objects |
-| PBI-056 | Visible table, column, and measure names, and their descriptions, are free of spelling errors | Quality and Consistency | None (Project) | Project | 🟡 | Pending | Added after TASK-001 found a spelling error in a model's own internal naming ("Analitics"); see `DECISIONS.md` D-008 |
+| PBI-056 | Visible table, column, and measure names, and their descriptions, are free of spelling errors | Quality and Consistency | None (Project) | Project | 🟡 | Met | Found consistently Met in TASK-001 v2-v3 audits: no clear spelling errors in visible table/column/measure names or descriptions in en-US; see `DECISIONS.md` D-008 |
 
 ## Requirement Summary
 
 | Category | Total | Met | Pending | Blocked |
 |---|---:|---:|---:|---:|
 | Prerequisites | 9 | 0 | 9 | 0 |
-| Modeling and Schema | 5 | 0 | 5 | 0 |
-| Relationships | 7 | 0 | 7 | 0 |
-| Naming | 7 | 0 | 7 | 0 |
+| Modeling and Schema | 5 | 5 | 0 | 0 |
+| Relationships | 7 | 4 | 3 | 0 |
+| Naming | 7 | 1 | 6 | 0 |
 | Measures | 2 | 0 | 2 | 0 |
 | Metadata and Descriptions | 2 | 0 | 2 | 0 |
 | Discoverability | 1 | 0 | 1 | 0 |
@@ -163,8 +163,8 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 | Security | 1 | 0 | 1 | 0 |
 | AI Preparation | 14 | 0 | 14 | 0 |
 | Testing and Validation | 6 | 0 | 6 | 0 |
-| Quality and Consistency | 1 | 0 | 1 | 0 |
-| **Total** | **56** | **0** | **56** | **0** |
+| Quality and Consistency | 1 | 1 | 0 | 0 |
+| **Total** | **56** | **11** | **45** | **0** |
 
 ## Evidence Rollup
 
@@ -244,3 +244,4 @@ When this matrix changes:
 | 2026-07-23 | Fixed `.github/copilot-instructions.md` and `DECISIONS.md` to use current PBI-001..055 ids instead of rejected historical ids (PBI-060/065/070/072/074/080-082); removed an incorrect claim that relationships are MCP-automatable (they are a protected invariant); created missing `docs/microsoft/review_notes.md`; fixed `PROJECT.md` file-name reference | Claude (repository engineer skill) |
 | 2026-07-24 | Verified 14 previously-`Planned` sources against Microsoft Learn (real URLs added); 12 moved to `Verified`, 2 (`MS-MODEL-11`, `MS-MODEL-12`) moved to `Reviewed` with open applicability questions logged in `review_notes.md`; Evidence Rollup now shows 55/55 requirements with verified evidence; corroborated the existence of the official Power BI Modeling MCP server (github.com/microsoft/powerbi-modeling-mcp) referenced by `.github/copilot-instructions.md` | Claude (repository engineer skill) |
 | 2026-07-24 | Reverted TASK-001's baseline+audit merge for `user-usage-analytics` (PR #4) to re-run it with two audit-quality fixes applied first. Added `PBI-056` (spelling check on visible names/descriptions), the first `Project`-evidence-level requirement — see `DECISIONS.md` D-008. Updated `rules.yaml` PBI-027/033 to require reading the current `Synonyms` state via MCP before drafting proposals, rather than assuming a blank slate. Requirement Summary and Evidence Rollup now cover 56 requirements | Claude (repository engineer skill) |
+| 2026-07-24 | Synced 11 requirements (PBI-010–017, 021, 028, 056) from `Pending` to `Met`, retroactively reflecting what TASK-001 v1–v3 audits independently and consistently found (no automatable fix was ever needed for these; the audit workflow simply never synced its own findings into this file before). Requirement Summary recomputed: 11/56 Met. `audit-prompt.md` step 8 now requires this sync going forward, so future audits don't leave already-Met findings stuck on `Pending` | Claude (repository engineer skill) |
