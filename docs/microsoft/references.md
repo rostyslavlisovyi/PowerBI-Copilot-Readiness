@@ -43,9 +43,9 @@ Source identifiers must remain stable even when Microsoft changes a document tit
 
 | Source_ID | Document | Area | URL | Version | Last Reviewed | Status | Notes |
 |---|---|---|---|---|---|---|---|
-| MS-COP-01 | Semantic model naming guidance | Copilot | TBD | Current online documentation | TBD | Planned | Naming and field disambiguation guidance |
-| MS-COP-02 | Organize semantic models for Copilot | Copilot | TBD | Current online documentation | TBD | Planned | Model organization, naming, and hidden objects |
-| MS-COP-03 | Optimize semantic models for Copilot | Copilot | TBD | Current online documentation | TBD | Planned | Primary Copilot semantic-model guidance |
+| MS-COP-01 | Copilot in Power BI tutorial: Prepare semantic model for AI (Guidance section) | Copilot | <https://learn.microsoft.com/power-bi/create-reports/tutorial-copilot-power-bi-prepare-model#guidance> | Current online documentation | 2026-07-24 | Verified | Naming and field disambiguation guidance (distinguishing "Name" in Customer vs. Store) |
+| MS-COP-02 | Copilot in Power BI tutorial: Prepare semantic model for AI (Guidance section) | Copilot | <https://learn.microsoft.com/power-bi/create-reports/tutorial-copilot-power-bi-prepare-model#guidance> | Current online documentation | 2026-07-24 | Verified | Model organization, naming, and hidden objects (same source article as MS-COP-01, different section emphasis) |
+| MS-COP-03 | Optimize your semantic model for Copilot in Power BI | Copilot | <https://learn.microsoft.com/power-bi/create-reports/copilot-evaluate-data> | Current online documentation | 2026-07-24 | Verified | Primary Copilot semantic-model guidance: model structure, measures/KPIs, naming, data quality, refresh/security/metadata |
 | MS-COP-04 | Prepare your data for AI to improve Copilot results (preview) | Copilot | <https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai> | Current online documentation | 2026-07-19 | Verified | AI preparation workflow, Approved for Copilot, testing guidance, and upgrade considerations |
 | MS-PREP-01 | Prepare your data for AI | Prep Data for AI | <https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai> | Current online documentation | 2026-07-17 | Verified | Overview of AI preparation authoring in Power BI Desktop and the Power BI service |
 | MS-PREP-02 | Prepare your data for AI: AI data schemas | Prep Data for AI | <https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai-data-schema> | Current online documentation | 2026-07-17 | Verified | AI schema scope, Q&A prerequisite, testing, refresh behavior, and limitations |
@@ -55,17 +55,17 @@ Source identifiers must remain stable even when Microsoft changes a document tit
 | MS-PREP-06 | Prepare your data for AI: Settings | Prep Data for AI | <https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai-settings> | Current online documentation | 2026-07-17 | Verified | Copilot indexing and Local Desktop Indexing settings |
 | MS-MODEL-01 | Understand star schema and its relevance to Power BI | Modeling | <https://learn.microsoft.com/power-bi/guidance/star-schema> | Current online documentation | 2026-07-19 | Verified | Star-schema design guidance for semantic models |
 | MS-MODEL-02 | Use Copilot with semantic models | Modeling | <https://learn.microsoft.com/power-bi/create-reports/copilot-semantic-models> | Current online documentation | 2026-07-19 | Verified | Connects semantic-model best practices with improved Copilot response quality |
-| MS-MODEL-03 | Model relationships in Power BI Desktop | Modeling | TBD | Current online documentation | TBD | Planned | Cardinality, active relationships, RLS propagation, and model integrity |
-| MS-MODEL-04 | Bi-directional relationship guidance | Modeling | TBD | Current online documentation | TBD | Planned | Bi-directional filtering, CROSSFILTER, and relationship best practices |
-| MS-MODEL-09 | Calculation groups | Modeling | TBD | Current online documentation | TBD | Planned | Calculation-group behavior and metadata |
-| MS-MODEL-11 | Q&A synonyms | Modeling | TBD | Current online documentation | TBD | Planned | Direct applicability to Copilot must still be verified |
-| MS-MODEL-12 | Perspectives | Modeling | TBD | Current online documentation | TBD | Planned | Direct applicability to Copilot must still be verified |
-| MS-MODEL-13 | Data categories in Power BI Desktop | Modeling | TBD | Current online documentation | TBD | Planned | Data-category metadata |
-| MS-NAME-01 | Naming guidance for semantic models | Naming | TBD | Current online documentation | TBD | Planned | Human-readable names, naming consistency, abbreviations, and measure naming |
-| MS-NAME-02 | Business terminology guidance | Naming | TBD | Current online documentation | TBD | Planned | Business vocabulary, alternative terminology, and discoverability |
-| MS-MEASURE-01 | Measure metadata guidance | Measures | TBD | Current online documentation | TBD | Planned | Measure descriptions and human review guidance |
-| MS-META-01 | Metadata guidance for semantic models | Metadata | TBD | Current online documentation | TBD | Planned | Descriptions, format strings, data types, and data categories |
-| MS-DISC-01 | Discoverability guidance | Discoverability | TBD | Current online documentation | TBD | Planned | Synonyms for important business tables and fields |
+| MS-MODEL-03 | Model relationships in Power BI Desktop | Modeling | <https://learn.microsoft.com/power-bi/transform-model/desktop-relationships-understand> | Current online documentation | 2026-07-24 | Verified | Cardinality, cross filter direction, active vs. inactive relationships; RLS propagation is documented in the linked "Active vs inactive relationship guidance" and "Row-level security (RLS)" articles, not this page directly |
+| MS-MODEL-04 | Bi-directional relationship guidance | Modeling | <https://learn.microsoft.com/power-bi/guidance/relationships-bidirectional-filtering> | Current online documentation | 2026-07-24 | Verified | Bi-directional filtering, CROSSFILTER() DAX function, and recommendation to minimize bi-directional relationships |
+| MS-MODEL-09 | Create calculation groups | Modeling | <https://learn.microsoft.com/power-bi/transform-model/calculation-groups> | Current online documentation | 2026-07-24 | Verified | Calculation-group creation and behavior; description guidance for calculation items is in MS-COP-03, not this page |
+| MS-MODEL-11 | Add synonyms to tables and columns (Q&A best practices) | Modeling | <https://learn.microsoft.com/power-bi/natural-language/q-and-a-best-practices#normalize-your-model> | Current online documentation | 2026-07-24 | Reviewed | CAUTION: classic Power BI Q&A is being retired in December 2026 in favor of Copilot (per Microsoft's own deprecation notice). Direct applicability to Copilot is NOT confirmed by this source; Copilot's own use of field synonyms as grounding data is documented separately in MS-MODEL-02 ("Use Copilot with semantic models"). See `review_notes.md`. |
+| MS-MODEL-12 | Perspectives in tabular models | Modeling | <https://learn.microsoft.com/analysis-services/tabular-models/perspectives-ssas-tabular> | Current online documentation | 2026-07-24 | Reviewed | Perspectives are a Fabric/Power BI Premium capacity + Analysis Services feature; no Microsoft source found stating perspectives affect Copilot grounding or DAX generation. Direct applicability to Copilot remains unconfirmed. See `review_notes.md`. |
+| MS-MODEL-13 | Specify data categories in Power BI Desktop | Modeling | <https://learn.microsoft.com/power-bi/transform-model/desktop-data-categorization> | Current online documentation | 2026-07-24 | Verified | Data-category metadata (e.g. geography categories) and how Power BI uses it for visualizations |
+| MS-NAME-01 | Optimize your semantic model for Copilot in Power BI / Use Copilot with semantic models / Semantic model best practices for data agent | Naming | <https://learn.microsoft.com/power-bi/create-reports/copilot-evaluate-data#considerations-for-semantic-models-for-copilot-use>; <https://learn.microsoft.com/power-bi/create-reports/copilot-semantic-models#develop-a-semantic-model-with-help-from-copilot>; <https://learn.microsoft.com/fabric/data-science/semantic-model-best-practices#common-pitfalls-to-avoid> | Current online documentation | 2026-07-24 | Verified | Human-readable names, naming consistency, avoiding acronyms/abbreviations/punctuation, English measure names. Spans 3 related Microsoft articles rather than one dedicated page |
+| MS-NAME-02 | Best practices for configuring your data agent | Naming | <https://learn.microsoft.com/fabric/data-science/data-agent-configuration-best-practices#5-define-business-terms-abbreviations-and-synonyms> | Current online documentation | 2026-07-24 | Verified | Business vocabulary, abbreviations, and synonyms guidance ("Define business terms, abbreviations, and synonyms"). This article targets Fabric data agent rather than Copilot in Power BI specifically; content is directly transferable but framing differs |
+| MS-MEASURE-01 | Optimize your semantic model for Copilot in Power BI (Measures and KPIs section) | Measures | <https://learn.microsoft.com/power-bi/create-reports/copilot-evaluate-data#considerations-for-semantic-models-for-copilot-use> | Current online documentation | 2026-07-24 | Verified | Standardized calculation logic, measure naming conventions, predefined measures/KPIs, and descriptions |
+| MS-META-01 | Optimize your semantic model for Copilot in Power BI (Columns/data quality and Refresh/security/metadata sections) | Metadata | <https://learn.microsoft.com/power-bi/create-reports/copilot-evaluate-data#considerations-for-semantic-models-for-copilot-use> | Current online documentation | 2026-07-24 | Verified | Descriptions (200-char limit), format strings implied via data-type accuracy, data types, and metadata documentation; data-category specifics are in MS-MODEL-13 |
+| MS-DISC-01 | Use Copilot with semantic models (grounding data / synonyms) | Discoverability | <https://learn.microsoft.com/power-bi/create-reports/copilot-semantic-models#develop-a-semantic-model-with-help-from-copilot> | Current online documentation | 2026-07-24 | Verified | Field synonyms are explicitly listed as Copilot grounding data; consistent naming/limited punctuation improves synonym usefulness. Prefer this over MS-MODEL-11 (Q&A synonyms), which documents a feature being retired |
 | MS-FAB-02 | Enable and configure Copilot in Microsoft Fabric | Fabric Administration | <https://learn.microsoft.com/fabric/fundamentals/copilot-enable-fabric> | Current online documentation | 2026-07-17 | Verified | Tenant settings, delegated capacity configuration, workspace assignment, cross-region processing, and user access |
 | MS-FAB-03 | Enable Fabric Copilot for Power BI | Fabric Administration | <https://learn.microsoft.com/power-bi/create-reports/copilot-enable-power-bi> | Current online documentation | 2026-07-17 | Verified | Capacity, licensing, region, workspace, Desktop access, and sovereign-cloud limitations |
 | MS-HIDDEN-01 | Use Copilot with semantic models | Model Organization | <https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-semantic-models> | Current online documentation | 2026-07-19 | Verified | Microsoft recommends hiding columns and measures that are not intended for report consumers |
@@ -206,24 +206,18 @@ Mapped source: `MS-SEC-01`.
 
 ## Planned Source Work
 
-The following registered sources still require URL verification and evidence review:
+As of 2026-07-24, all 14 sources previously listed here have been reviewed against Microsoft
+Learn. 12 are now `Verified` (`MS-COP-01`, `MS-COP-02`, `MS-COP-03`, `MS-MODEL-03`,
+`MS-MODEL-04`, `MS-MODEL-09`, `MS-MODEL-13`, `MS-NAME-01`, `MS-NAME-02`, `MS-MEASURE-01`,
+`MS-META-01`, `MS-DISC-01`). 2 remain `Reviewed` pending an open applicability question logged
+in `review_notes.md`:
 
-- `MS-COP-01`
-- `MS-COP-02`
-- `MS-COP-03`
-- `MS-MODEL-03`
-- `MS-MODEL-04`
-- `MS-MODEL-09`
-- `MS-MODEL-11`
-- `MS-MODEL-12`
-- `MS-MODEL-13`
-- `MS-NAME-01`
-- `MS-NAME-02`
-- `MS-MEASURE-01`
-- `MS-META-01`
-- `MS-DISC-01`
+- `MS-MODEL-11` (Q&A synonyms) — documents a feature being retired in December 2026; not used
+  as a source for any current requirement.
+- `MS-MODEL-12` (Perspectives) — no confirmed Copilot applicability found; not used as a source
+  for any current requirement.
 
-Requirements mapped only to these sources must not be described as fully Microsoft-verified until the source review is complete.
+No sources currently remain in the `Planned` state.
 
 ## Review Process
 

@@ -172,21 +172,25 @@ A requirement is counted as verified only when every supporting `Source_ID` has 
 
 | Evidence Level | Total | Verified | Pending Verification |
 |---|---:|---:|---:|
-| Direct | 22 | 21 | 1 |
-| Derived | 3 | 1 | 2 |
-| Recommended | 30 | 13 | 17 |
+| Direct | 22 | 22 | 0 |
+| Derived | 3 | 3 | 0 |
+| Recommended | 30 | 30 | 0 |
 | Project | 0 | 0 | 0 |
-| **Total classified requirements** | **55** | **35** | **20** |
+| **Total classified requirements** | **55** | **55** | **0** |
 
 ### Verification Boundary
 
-The following requirements remain pending source verification because at least one supporting source is still `Planned`:
+As of 2026-07-24, every requirement's supporting `Source_ID`(s) are recorded as `Verified`
+in [`references.md`](references.md#source-registry). The 20 requirements previously pending
+(`PBI-015`–`PBI-021`, `PBI-022`–`PBI-033`, `PBI-055`) are now backed by real Microsoft Learn
+URLs (`MS-MODEL-03`, `MS-MODEL-04`, `MS-NAME-01`, `MS-NAME-02`, `MS-MEASURE-01`, `MS-META-01`,
+`MS-DISC-01`).
 
-- `PBI-015`–`PBI-021`
-- `PBI-022`–`PBI-033`
-- `PBI-055`
-
-All other requirements are mapped only to sources currently recorded as `Verified` in [`references.md`](references.md).
+This resolves **evidence verification** only, not **implementation status** — see the
+per-requirement `Status` column above, which remains `Pending` until an actual model is
+assessed. Two related sources (`MS-MODEL-11` Q&A synonyms, `MS-MODEL-12` Perspectives) were
+also reviewed but are not currently mapped to any `PBI-*` requirement and carry open
+applicability questions — see `review_notes.md`.
 
 This rollup describes **evidence verification**, not implementation status. A requirement can have verified evidence while its assessment status remains `Pending`.
 
@@ -233,3 +237,5 @@ When this matrix changes:
 | 2026-07-12 | Initial matrix seeded from Microsoft sources | Rostyslav Lisovyi |
 | 2026-07-17 | Added evidence classification and MVP scope guidance | Rostyslav Lisovyi |
 | 2026-07-19 | Aligned requirement numbering, source verification, executable-rule mappings, cross-document links, summaries, and evidence rollup | Rostyslav Lisovyi |
+| 2026-07-23 | Fixed `.github/copilot-instructions.md` and `DECISIONS.md` to use current PBI-001..055 ids instead of rejected historical ids (PBI-060/065/070/072/074/080-082); removed an incorrect claim that relationships are MCP-automatable (they are a protected invariant); created missing `docs/microsoft/review_notes.md`; fixed `PROJECT.md` file-name reference | Claude (repository engineer skill) |
+| 2026-07-24 | Verified 14 previously-`Planned` sources against Microsoft Learn (real URLs added); 12 moved to `Verified`, 2 (`MS-MODEL-11`, `MS-MODEL-12`) moved to `Reviewed` with open applicability questions logged in `review_notes.md`; Evidence Rollup now shows 55/55 requirements with verified evidence; corroborated the existence of the official Power BI Modeling MCP server (github.com/microsoft/powerbi-modeling-mcp) referenced by `.github/copilot-instructions.md` | Claude (repository engineer skill) |

@@ -96,7 +96,7 @@ The project is considered successful when:
 |------|---------|
 | README.md | Repository overview |
 | PROJECT.md | Project definition |
-| COPILOT_READY_STANDARD.md | Official Copilot Ready standard |
+| COPILOT_READINESS_CHECKLIST.md | Official Copilot Ready standard / assessment checklist |
 | TASKS.md | Project backlog |
 | DECISIONS.md | Architecture and project decisions |
 | .github/copilot-instructions.md | GitHub Copilot guidance |
