@@ -1,0 +1,40 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+	sourceQueryCulture: uk-UA
+	dataAccessOptions
+		fastCombine
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation PBI_QueryOrder = ["Data Refresh Status","GetCurrentDateTime","Web App Deployments","PostHog Application Usage Events","CRM Application Deployments","Power BI Report Mapping","PostHog Power BI Usage Events","Power BI Report Catalog"]
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_ProTooling = ["CalcGroup","MCP-PBIModeling"]
+
+ref table DateTableTemplate_7524b8f3-5e9f-405e-9d8a-bbfaeef883e7
+ref table Calendar
+ref table 'Metric Selector'
+ref table 'Dimension Selector'
+ref table 'Data Refresh Status'
+ref table LocalDateTable_a84b3409-4c6e-47a4-a2ff-e8b6f2726615
+ref table 'Web App Deployments'
+ref table LocalDateTable_cf2b5915-6af8-4cf7-9b9e-55e1beed0726
+ref table 'PostHog Application Usage Events'
+ref table _Measures
+ref table 'CRM Application Deployments'
+ref table LocalDateTable_73cbcdb8-60a9-4faa-92fb-beb286760bad
+ref table LocalDateTable_d0d47e85-ce06-469c-b3c6-210fab3eb9db
+ref table 'CRM Services'
+ref table 'CRM Modules'
+ref table LocalDateTable_a516a5a2-c968-4253-9bc0-8025b060ed61
+ref table 'Power BI Report Mapping'
+ref table 'PostHog Power BI Usage Events'
+ref table 'Power BI Report Catalog'
+
+ref role Permissions
+
+ref cultureInfo en-US
+

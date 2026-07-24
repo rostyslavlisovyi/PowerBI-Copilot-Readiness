@@ -1,0 +1,116 @@
+/// Reference table containing the official catalog of all Power BI embedded reports published across client workspaces. Each row represents a unique report with its business name and workspace information. Used as the primary source of unified report names for Power BI adoption analysis. Connected to Power BI Report Mapping via Report ID to enrich usage events with official report names.
+table 'Power BI Report Catalog'
+	lineageTag: ae3ad8e1-3dcc-4a7b-8965-6304cdad55e3
+
+	/// Description:
+	/// 
+	/// The unique identifier of the Power BI workspace where the report is published. Corresponds to the client Power BI workspace in the Power BI service. Hidden from reports — used for technical reference and potential workspace-level filtering only.
+	/// Business Logic:
+	/// 
+	/// Each workspace corresponds to a client deployment in the Power BI service. The Workspace ID is the internal Power BI service identifier for the workspace.
+	/// Usage:
+	/// 
+	/// Do not use directly in report visuals. Hidden technical field. Use Workspace Name for any workspace-level analysis if needed.
+	column 'Workspace ID'
+		dataType: string
+		displayFolder: Workspace Info
+		lineageTag: 09a05c7a-a88d-4531-8e6f-779c71a86d9b
+		summarizeBy: none
+		sourceColumn: Workspace ID
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Description:
+	/// 
+	/// The name of the Power BI workspace where the report is published. Typically corresponds to the client CRM instance name in the Power BI service. Use this field to filter or group reports by client workspace when analyzing Power BI adoption across different client environments.
+	/// Business Logic:
+	/// 
+	/// Each workspace represents a separate client deployment in the Power BI service. The Workspace Name provides a human-readable identifier for the client workspace, complementing the technical Workspace ID.
+	/// Usage:
+	/// 
+	/// Use to filter or group Power BI report catalog entries by client workspace. Useful for workspace-level adoption analysis and identifying which client environments have which reports published.
+	column 'Workspace Name'
+		dataType: string
+		displayFolder: Workspace Info
+		lineageTag: 681b4fc8-6a0f-486d-b87e-d0b42f84ef8f
+		summarizeBy: none
+		sourceColumn: Workspace Name
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Description:
+	/// 
+	/// The unique numeric identifier of the Power BI embedded report within the Power BI service. Used as the relationship key between Power BI Report Catalog and Power BI Report Mapping. Hidden from reports — use Report Name for all display and filtering purposes.
+	/// Business Logic:
+	/// 
+	/// Serves as the technical join key between Power BI Report Catalog and Power BI Report Mapping. Each Report ID uniquely identifies a report within the Power BI service catalog.
+	/// Usage:
+	/// 
+	/// Do not use directly in report visuals. Required only as a relationship key. Use Report Name instead for all analytical and display purposes.
+	column 'Report ID'
+		dataType: string
+		isHidden
+		displayFolder: Report Info
+		lineageTag: 2458a4c8-4d68-4f27-a475-e5ae9a78a3a3
+		summarizeBy: none
+		sourceColumn: Report ID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Description:
+	/// 
+	/// The official business name of the Power BI embedded report as published in the client workspace. Use this field as the primary dimension for all Power BI report adoption and usage analysis. This is the unified display name shown in all report visuals.
+	/// Business Logic:
+	/// 
+	/// Each report name is unique within the catalog and represents a distinct Power BI embedded report deployed across one or more client workspaces. Use this field to group and filter Power BI usage events by report name.
+	/// Usage:
+	/// 
+	/// Use as the primary dimension in all Power BI adoption visuals — bar charts, tables, slicers. Always use this field from Power BI Report Catalog rather than from Power BI Report Mapping to ensure consistent report naming across all visuals.
+	column 'Report Name'
+		dataType: string
+		displayFolder: Report Info
+		lineageTag: a332b630-a1cb-405e-bb2e-aabd6f971489
+		summarizeBy: none
+		sourceColumn: Report Name
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Description:
+	/// 
+	/// The unique identifier of the Power BI dataset (semantic model) that powers the embedded report. Used for technical reference to identify which semantic model underlies each report in the catalog. Hidden from reports.
+	/// Business Logic:
+	/// 
+	/// Each Power BI report is built on top of a dataset (semantic model). The Dataset ID links the report to its underlying data model in the Power BI service. May be used for technical auditing or dataset-level analysis.
+	/// Usage:
+	/// 
+	/// Do not use directly in report visuals. Hidden technical field for reference purposes only.
+	column 'Dataset ID'
+		dataType: string
+		displayFolder: Workspace Info
+		lineageTag: 76518b7d-9c11-4f55-ae1f-a9c060e33827
+		summarizeBy: none
+		sourceColumn: Dataset ID
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Power BI Report Catalog' = m
+		mode: import
+		source =
+				let
+				    Source = Json.Document(File.Contents("\\192.168.151.145\results2\reports.json")),
+				    #"Converted to Table" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+				    #"Expanded Column1" = Table.ExpandRecordColumn(#"Converted to Table", "Column1", {"Group ID", "Group Name", "Report ID", "Report Name", "Web URL", "Dataset ID", "Description"}, {"Group ID", "Group Name", "Report ID", "Report Name", "Web URL", "Dataset ID", "Description"}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Expanded Column1",{{"Group ID", type text}, {"Group Name", type text}, {"Report ID", type text}, {"Report Name", type text}, {"Web URL", type text}, {"Dataset ID", type text}, {"Description", type text}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"Web URL", "Description"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Columns",{{"Group ID", "Workspace ID"}, {"Group Name", "Workspace Name"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
