@@ -33,8 +33,12 @@ question testing. These are applied manually in the Service (see "Manual lane").
    `PBI-*` id. Do not write until the plan is approved.
 4. **Least change.** Modify only what a requirement demands. Never delete objects to
    "clean up" unless explicitly instructed.
-5. **Git discipline.** Never push to `main`. Create a branch, commit, open a PR.
-   A human reviews and merges.
+5. **Git discipline.** Never push to `main`. One branch per *run*, not per
+   model: `assessment/<model-slug>-<YYYY-MM-DD>` for read-only audits,
+   `fix/<model-slug>-<YYYY-MM-DD>` for runs that apply changes. Commit, open a
+   PR into `main`. A human reviews and merges; the branch can then be deleted.
+   The permanent record is the `docs/runs/<model-slug>/` folder on `main`
+   (one folder per model, every run's files inside it) — not the branch.
 6. **Data privacy.** The MCP sends metadata and DAX query *results* to the LLM.
    Do NOT run DAX that returns row-level client / PII / financial data.
    Metadata-only operations are fine; prefer definition/schema checks for validation.
@@ -138,6 +142,7 @@ and perspective member management. Before relying on any of these, call the tool
 
 ## Run log
 
-For each run, append to `docs/runs/<model>-<YYYY-MM-DD>.md`:
-model name, baseline commit, changes applied (per `PBI-*`), verification result,
-and outstanding manual items.
+For each run, append to `docs/runs/<model-slug>/<YYYY-MM-DD>.md` (one folder
+per model, per the branching convention above): model name, baseline commit,
+changes applied (per `PBI-*`), verification result, and outstanding manual
+items.
