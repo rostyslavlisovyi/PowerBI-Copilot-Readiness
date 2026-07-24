@@ -15,6 +15,17 @@ find {TASK_ID} for this run.
 
 Produce Manual-lane deliverables for model "{MODEL_NAME}" (slug: {MODEL_SLUG}):
 
+0. **MANDATORY pre-flight sync (do not skip):**
+   ```
+   git fetch origin
+   git checkout main
+   git pull origin main
+   git rev-parse HEAD
+   git rev-parse origin/main
+   ```
+   The two hashes must match exactly. If a branch for this task already
+   exists locally or on origin from an earlier attempt, delete it first and
+   branch fresh from this just-pulled `main`.
 1. Create and switch to branch docs/{MODEL_SLUG}-manual-lane-{DATE}.
 2. Connect using: Connect to '{MODEL_NAME}' in Power BI Desktop
    (read-only -- no write operations in this task).

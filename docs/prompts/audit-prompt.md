@@ -17,6 +17,19 @@ find the task for this run.
 Execute a read-only baseline assessment for model "{MODEL_NAME}"
 (slug: {MODEL_SLUG}):
 
+0. **MANDATORY pre-flight sync (do not skip):**
+   ```
+   git fetch origin
+   git checkout main
+   git pull origin main
+   git rev-parse HEAD
+   git rev-parse origin/main
+   ```
+   The two hashes must match exactly. If a branch for this task already
+   exists locally or on origin from an earlier attempt, delete it first
+   (`git push origin --delete <branch>`, `git branch -D <branch>`) and
+   branch fresh from this just-pulled `main`. Do not resume or branch from
+   any other state.
 1. If re-running the same day, delete any existing
    assessment/{MODEL_SLUG}-{DATE}* branch (local and remote) first, then
    create and switch to: assessment/{MODEL_SLUG}-{DATE}

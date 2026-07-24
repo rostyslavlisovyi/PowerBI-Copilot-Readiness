@@ -39,10 +39,28 @@ question testing. These are applied manually in the Service (see "Manual lane").
    PR into `main`. A human reviews and merges; the branch can then be deleted.
    The permanent record is the `docs/runs/<model-slug>/` folder on `main`
    (one folder per model, every run's files inside it) — not the branch.
-6. **Data privacy.** The MCP sends metadata and DAX query *results* to the LLM.
+6. **Mandatory pre-flight sync — before creating ANY task branch:**
+   ```
+   git fetch origin
+   git checkout main
+   git pull origin main
+   git rev-parse HEAD          # compare this...
+   git rev-parse origin/main   # ...to this — they must be identical
+   ```
+   If they don't match, stop and resolve that first. Never branch from a
+   local `main` you haven't just pulled, and never reuse or resume a branch
+   left over from an earlier attempt at the same task — delete it
+   (`git push origin --delete <branch>`, `git branch -D <branch>`) and
+   re-branch fresh from the just-pulled `main`. This exists because TASK-002
+   was branched from a `main` that was several commits stale (missing
+   `docs/prompts/`, a business-glossary fill-in, and a Status sync), causing
+   a real merge conflict in `requirements_matrix.md` when the branch was
+   finally merged. Skipping this step is not a minor shortcut — it silently
+   produces a fork that looks fine until merge time.
+7. **Data privacy.** The MCP sends metadata and DAX query *results* to the LLM.
    Do NOT run DAX that returns row-level client / PII / financial data.
    Metadata-only operations are fine; prefer definition/schema checks for validation.
-7. **Confirmations.** The server elicits approval before the first write and first
+8. **Confirmations.** The server elicits approval before the first write and first
    query. Do not use `--skipconfirmation` on production models.
 
 ---

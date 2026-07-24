@@ -19,6 +19,20 @@ find {TASK_ID}, which records the human-approved scope for this run.
 
 Apply {TASK_ID}'s approved scope for model "{MODEL_NAME}" (slug: {MODEL_SLUG}):
 
+0. **MANDATORY pre-flight sync (do not skip):**
+   ```
+   git fetch origin
+   git checkout main
+   git pull origin main
+   git rev-parse HEAD
+   git rev-parse origin/main
+   ```
+   The two hashes must match exactly. If a branch for this task already
+   exists locally or on origin from an earlier attempt, delete it first
+   (`git push origin --delete <branch>`, `git branch -D <branch>`) and
+   branch fresh from this just-pulled `main`. Do not resume or branch from
+   any other state — a stale branch base is a real merge-conflict risk, not
+   a theoretical one (it happened on this exact task once already).
 1. Create and switch to branch fix/{MODEL_SLUG}-{DATE}.
 2. Re-connect to the model; confirm the baseline snapshot in
    docs/runs/{MODEL_SLUG}/{AUDIT_DATE}-baseline/ still matches the current

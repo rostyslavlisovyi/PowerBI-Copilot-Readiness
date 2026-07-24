@@ -75,3 +75,19 @@ nothing for the automatable lane to detect or fix there. If a future need
 arises to check report/file-level naming, it must be a separate requirement
 with its own detection mechanism (outside the MCP), not a PBI-056 scope
 expansion.
+
+## D-011 — Mandatory pre-flight git sync before branching for any task
+TASK-002 was branched from a `main` several commits behind the true remote
+tip (missing `docs/prompts/`, a business-glossary fill-in, and a Status
+sync). This wasn't caught until merge time, where it produced a real
+conflict in `requirements_matrix.md` (both sides had independently changed
+the same rows). Root cause: nothing forced a sync check before creating a
+task branch, so a stale local `main` silently became the fork point.
+Decision: every prompt template (`docs/prompts/*.md`) and
+`.github/copilot-instructions.md` now require, as a literal first step
+before any branch is created, `git fetch origin && git checkout main &&
+git pull origin main`, followed by comparing `git rev-parse HEAD` against
+`git rev-parse origin/main` — they must match. Any leftover branch from an
+earlier attempt at the same task must be deleted, not resumed. This is a
+process fix, not a one-time cleanup: it applies to every future task, for
+this model and any other.
