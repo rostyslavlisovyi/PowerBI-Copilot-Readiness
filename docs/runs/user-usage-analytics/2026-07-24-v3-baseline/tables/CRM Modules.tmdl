@@ -1,0 +1,47 @@
+/// Description:
+/// 
+/// Reference table containing the complete list of all available CRM modules across the platform, regardless of whether they have recorded user activity. Used as the primary dimension for CRM module analysis to ensure all modules are visible in reports — including those with zero active users. Connect to PostHog Application Usage Events via CRM Module Name.
+/// Business Logic:
+/// 
+/// Acts as a dimension table for CRM module filtering and visualization. Enables reports to display all available CRM modules including those with no activity in the selected period. Relationship to PostHog Application Usage Events is one-to-many on CRM Module Name with single cross-filter direction.
+/// Usage:
+/// 
+/// Always use CRM Module Name from this table as the Y axis or filter dimension in module-level visuals. Do not use CRM Module Name from PostHog Application Usage Events directly in visuals — that approach will hide modules with zero activity.
+table 'CRM Modules'
+	lineageTag: 87987285-4796-4283-9514-d9135f524bb6
+
+	column 'CRM Module Name'
+		lineageTag: 9f8b85f3-089f-4447-a032-08530e53b8fc
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [CRM Module Name]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'CRM Modules' = calculated
+		mode: import
+		source =
+				
+				DATATABLE(
+				    "CRM Module Name", STRING,
+				    {
+				        {"Schedule"},
+				        {"Contacts"},
+				        {"Companies"},
+				        {"Home"},
+				        {"Reports"},
+				        {"CLM Presentations"},
+				        {"Custom Objects"},
+				        {"Expenses"},
+				        {"Finance"},
+				        {"Material Manager"},
+				        {"MIR"},
+				        {"Petrol Report"},
+				        {"Reclamation"},
+				        {"Support"},
+				        {"Vigilance"}
+				    }
+				)
+
+	annotation PBI_Id = c885b35224594ae4b2f58932c1a51fea
+

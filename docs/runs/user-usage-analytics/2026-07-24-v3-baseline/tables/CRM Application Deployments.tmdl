@@ -1,0 +1,111 @@
+/// Reference table containing the latest deployed version and deployment timestamp for each CRM application type, sourced from a Power BI Dataflow. The Flutter.Mobile version is referenced in DAX measures to identify users running the current versus outdated mobile application version. Use this table to monitor deployment status across the full CRM application portfolio.
+table 'CRM Application Deployments'
+	lineageTag: fd8cb3f8-7f35-40fc-904d-97b831222bd8
+
+	/// Counts the number of unique users who generated at least one CRM activity event within each calendar week. Designed for use in weekly trend charts where each bar represents one calendar week. Completed weeks show the full 7-day count. The current incomplete week reflects activity from the week start through yesterday and updates daily as new data arrives.
+	/// 
+	/// Business Logic:
+	/// Applies DISTINCTCOUNT on User Identifier within each week's date context on the chart axis. For completed weeks, counts users across the full 7-day period. For the current in-progress week, the window ends on yesterday to ensure only complete days are included. This produces a partial bar for the current week that grows daily until the week is complete.
+	/// 
+	/// Usage:
+	/// Use as the AC (Actual) field in Zebra BI Chart with Calendar Week Label on the axis to visualize week-over-week user activity trends. Do not use as a standalone KPI card — use Weekly Active Users instead for the fixed rolling 7-day window. The last bar on the chart always represents the current incomplete week and should not be compared directly to previous full weeks.
+	measure 'Weekly Active Users Trend' =
+			CALCULATE(
+			    DISTINCTCOUNT('PostHog Application Usage Events'[User Identifier]),
+			    DATESINPERIOD(
+			        'Calendar'[Date],
+			        MIN(
+			            LASTDATE('Calendar'[Date]),
+			            CALCULATE ( [Reference Date], REMOVEFILTERS('Calendar') )
+			        ),
+			        -7,
+			        DAY
+			    )
+			)
+		formatString: 0
+		displayFolder: Overview Dashboard
+		lineageTag: 45b5e989-8165-4b79-8864-df16e3daf884
+
+	measure 'WAU Trend Previous Week' =
+			VAR _CurrentWeekEnd =
+			    MIN(
+			        LASTDATE('Calendar'[Date]),
+			        CALCULATE ( [Reference Date], REMOVEFILTERS('Calendar') )
+			    )
+			VAR _PreviousWeekEnd = _CurrentWeekEnd - 7
+			RETURN
+			CALCULATE(
+			    DISTINCTCOUNT('PostHog Application Usage Events'[User Identifier]),
+			    DATESINPERIOD('Calendar'[Date], _PreviousWeekEnd, -7, DAY),
+			    REMOVEFILTERS('Calendar')
+			)
+		formatString: 0
+		lineageTag: d36dc007-5d2d-425e-aa67-f6ab6a7ad27c
+
+	column 'Application Name'
+		dataType: string
+		lineageTag: 5621af4d-6722-4742-95ed-541b9e1abd3b
+		summarizeBy: none
+		sourceColumn: Application Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Application Version'
+		dataType: string
+		lineageTag: 3f13202f-48fd-4f3a-b740-1167a0a8ff11
+		summarizeBy: none
+		sourceColumn: Application Version
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Latest Deployment Date'
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 8e3e80fa-332a-47d6-ada4-bb9d4ee800f1
+		summarizeBy: none
+		sourceColumn: Latest Deployment Date
+
+		variation Variation
+			isDefault
+			relationship: 75f983f3-95e2-41b9-a89b-b704d77cedc6
+			defaultHierarchy: LocalDateTable_a516a5a2-c968-4253-9bc0-8025b060ed61.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'CRM Application Deployments' = m
+		mode: import
+		source = ```
+				let
+				    Source = Json.Document(Web.Contents("https://salesdrivecrm.pharmahrm.com/manifest.json")),
+				    #"Converted to Table" = Table.FromRecords({Source}),
+				    #"Expanded applications" = Table.ExpandListColumn(#"Converted to Table", "applications"),
+				    #"Expanded applications1" = Table.ExpandRecordColumn(
+				        #"Expanded applications", 
+				        "applications", 
+				        {"name", "version", "latest_deployment"}, 
+				        {"applications.name", "applications.version", "applications.latest_deployment"}
+				    ),
+				    #"Changed Type" = Table.TransformColumnTypes(
+				        #"Expanded applications1",
+				        {
+				            {"applications.name", type text}, 
+				            {"applications.version", type text}, 
+				            {"applications.latest_deployment", type datetime}
+				        }
+				    ),
+				    #"Renamed Columns" = Table.RenameColumns(
+				        #"Changed Type",
+				        {
+				            {"applications.name", "Application Name"}, 
+				            {"applications.version", "Application Version"}, 
+				            {"applications.latest_deployment", "Latest Deployment Date"}
+				        }
+				    )
+				in
+				    #"Renamed Columns"
+				```
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

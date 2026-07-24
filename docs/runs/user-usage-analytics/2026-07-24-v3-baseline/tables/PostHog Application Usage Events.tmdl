@@ -1,0 +1,281 @@
+/// Records application usage events collected from PostHog across all CRM modules, devices, and countries. Each row represents a single tracked user action or session event. Used for user adoption analysis, feature engagement tracking, CRM module usage monitoring, and application version reporting.
+table 'PostHog Application Usage Events'
+	lineageTag: 872ff9eb-fa2d-4ef5-88c5-52c9a4ca4236
+
+	/// The date of the user activity event as recorded by PostHog on the user's device. Used as the primary date field for time-based analysis and connects to the Calendar table for time intelligence reporting.
+	column 'Event date'
+		dataType: dateTime
+		formatString: Long Date
+		displayFolder: Event Info
+		lineageTag: bbd66044-6679-4063-a130-2c5258b6f117
+		summarizeBy: none
+		sourceColumn: Event date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	/// The name of the CRM server instance from which the PostHog event was generated. Identifies the specific client deployment or hosted environment (also referred to as host or server name). Use this field to analyze usage and adoption across different client deployments or CRM environments.
+	column 'CRM Instance Name'
+		dataType: string
+		displayFolder: Event Info
+		lineageTag: 76ccd902-32bf-4b9e-9a55-219a9c213a64
+		summarizeBy: none
+		sourceColumn: CRM Instance Name
+
+		annotation SummarizationSetBy = Automatic
+
+	/// The raw PostHog user ID as transmitted in the event. May be empty for some events. Hidden from reports — use User Identifier for all user counting and analysis.
+	column 'User ID'
+		dataType: string
+		isHidden
+		displayFolder: User Info
+		lineageTag: ce4b9c36-5cd7-431b-a9a3-8bd7a4f0dec3
+		summarizeBy: none
+		sourceColumn: User ID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	/// The email address of the user as recorded in the PostHog event. Used as a secondary identifier when User ID is not available. For user-level analysis and counting unique users, use User Identifier instead, as it provides complete coverage across all identification methods.
+	column 'User Email'
+		dataType: string
+		displayFolder: User Info
+		lineageTag: c7aa821f-f437-4911-b781-67da22072f0a
+		summarizeBy: none
+		sourceColumn: User Email
+
+		annotation SummarizationSetBy = Automatic
+
+	/// The role assigned to the user within the CRM system, as transmitted in the PostHog event (for example, Sales Representative, Manager, Administrator). Use this field to analyze CRM adoption, feature usage, and engagement patterns across different user roles.
+	column 'User Role'
+		dataType: string
+		displayFolder: User Info
+		lineageTag: f657c387-e0e7-4b16-a4bc-79a328eda935
+		summarizeBy: none
+		sourceColumn: User Role
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Identifies whether the user accessed the CRM application via a mobile device or a web browser. Possible values: Mobile, Web. Use this field to segment and compare user behavior, feature adoption, and engagement metrics between mobile and web audiences.
+	column Platform
+		dataType: string
+		displayFolder: Device & App Info
+		lineageTag: 29498c82-2399-4bc7-b1b9-abc86f23e061
+		summarizeBy: none
+		sourceColumn: Platform
+
+		annotation SummarizationSetBy = Automatic
+
+	/// The operating system of the device used during the tracked CRM session, as reported by PostHog (for example, iOS, Android). Populated for mobile users only; typically empty for web users. Use this field to analyze CRM usage and performance across different mobile operating systems.
+	column 'Operating System'
+		dataType: string
+		displayFolder: Device & App Info
+		lineageTag: 76a9addd-6728-45ed-9f9c-eb1c2f992bd0
+		summarizeBy: none
+		sourceColumn: Operating System
+
+		annotation SummarizationSetBy = Automatic
+
+	/// The hardware model of the device used during the tracked CRM session, as reported by PostHog (for example, iPhone 14, Samsung Galaxy S23). Populated for mobile users only; typically empty for web users. Use this field to analyze CRM usage patterns across different device types and manufacturers.
+	column 'Device Model'
+		dataType: string
+		displayFolder: Device & App Info
+		lineageTag: d9743786-2f2b-40cb-abc9-7246da593067
+		summarizeBy: none
+		sourceColumn: Device Model
+
+		annotation SummarizationSetBy = Automatic
+
+	/// The name of the CRM web service accessed by the user, such as Cloud CRM, GeoForce, or other available services. For mobile users, this value is always Cloud CRM. For web users, multiple services are available. Use this field to compare engagement and adoption across different CRM services on the web platform.
+	column 'CRM Service Name'
+		dataType: string
+		displayFolder: CRM Classification
+		lineageTag: addde576-c622-4f6e-8337-de04b0489549
+		summarizeBy: none
+		sourceColumn: CRM Service Name
+
+		annotation SummarizationSetBy = Automatic
+
+	/// The name of the CRM module accessed by the user within the Cloud CRM service. Populated for all platforms (web and mobile). Mobile users navigate exclusively within Cloud CRM modules, while web users may access modules across multiple CRM services. Use this field to analyze module-level engagement and feature usage within the Cloud CRM service.
+	column 'CRM Module Name'
+		dataType: string
+		displayFolder: CRM Classification
+		lineageTag: 63078971-e91f-49b6-8eb6-988347a0d543
+		summarizeBy: none
+		sourceColumn: CRM Module Name
+
+		annotation SummarizationSetBy = Automatic
+
+	/// "The country where the user was located at the time of the tracked CRM event, as reported by PostHog. Use this field to analyze CRM adoption, feature usage, and user engagement across different countries and geographic regions.
+	column Country
+		dataType: string
+		displayFolder: Location
+		lineageTag: fa0c75c5-c8b3-4e6d-b399-4b60e66d5af6
+		summarizeBy: none
+		sourceColumn: Country
+
+		annotation SummarizationSetBy = Automatic
+
+	/// The name of the city or locality where the user was located at the time of the tracked CRM event, as reported by PostHog. Use this field to analyze CRM adoption and feature usage across different geographic locations.
+	column City
+		dataType: string
+		displayFolder: Location
+		lineageTag: 8b853c29-d277-4b76-8689-a612324999eb
+		summarizeBy: none
+		sourceColumn: City
+
+		annotation SummarizationSetBy = Automatic
+
+	/// The application version transmitted directly from the user's mobile device via PostHog event tracking. Populated for mobile users only (iOS and Android); empty for web application users. For cross-platform version analysis, use Application Version Unified instead.
+	column 'Application Version (Mobile)'
+		dataType: string
+		isHidden
+		displayFolder: Device & App Info
+		lineageTag: 23544030-2338-4362-a723-7bdb245bc0d7
+		summarizeBy: none
+		sourceColumn: Application Version (Mobile)
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	/// The number of times a specific user triggered the same event within a single calendar day. For example, if a user visited a CRM module 15 times in one day, this field contains 15. Each row represents a unique combination of user, event type, and date. Use SUM of this column in DAX measures to calculate total event volume. Do not aggregate directly in visuals without a measure — use predefined measures instead.
+	column 'Event Count'
+		dataType: int64
+		formatString: 0
+		displayFolder: Event Info
+		lineageTag: e76f1a33-b537-48eb-8bb6-a9a31f9fd983
+		summarizeBy: sum
+		sourceColumn: Event Count
+
+		annotation SummarizationSetBy = Automatic
+
+	/// A unified event attribution key derived from the best available identifier in the PostHog event. Resolution priority: (1) User ID, (2) User Email, (3) PostHog Distinct ID. Use this field exclusively for counting unique active users (DISTINCTCOUNT). Do not use as a relationship key or join field — this field may contain values of different types (ID, email, or technical identifier) across different rows.
+	column 'User Identifier'
+		dataType: string
+		displayFolder: User Info
+		lineageTag: aeb06889-9320-48c1-99bd-c5293d6ad0e2
+		summarizeBy: none
+		sourceColumn: User Identifier
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Normalized application version combining data from all platforms. For web users, the version is sourced from the Web Flutter deployment table; for mobile users, it is taken directly from the PostHog event. Use this column as the standard version field for all cross-platform version analysis and reporting.
+	column 'Application Version' =
+			
+			SWITCH(
+			    TRUE(),
+			    'PostHog Application Usage Events'[Platform] = "Web",
+			        RELATED('Web App Deployments'[Application Version]),
+			
+			    'PostHog Application Usage Events'[Platform] = "Mobile",
+			        'PostHog Application Usage Events'[Application Version (Mobile)],
+			
+			    BLANK()
+			)
+		displayFolder: Device & App Info
+		lineageTag: bc107460-a399-468e-b3e2-d4d6405b7d80
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column session_count
+		dataType: string
+		lineageTag: 51302fd9-2f2d-4a91-831b-ac67907979e5
+		summarizeBy: none
+		sourceColumn: session_count
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'PostHog Application Usage Events' = m
+		mode: import
+		source = ```
+				let
+				    Source = AzureStorage.Blobs("https://pbecrmde.blob.core.windows.net/crm/"),
+				    #"Imported File" = Source{[
+				        #"Folder Path" = "https://pbecrmde.blob.core.windows.net/crm/",
+				        Name = "243719954656925104/uua_v_usage_daily.csv"
+				    ]}[Content],
+				    #"Imported CSV" = Csv.Document(
+				        #"Imported File",
+				        [Delimiter=";", Encoding=65001, QuoteStyle=QuoteStyle.None]
+				    ),
+				    #"Promoted Headers" = Table.PromoteHeaders(
+				        #"Imported CSV",
+				        [PromoteAllScalars=true]
+				    ),
+				    #"Renamed Columns" = Table.RenameColumns(#"Promoted Headers",{{"app_version", "Application version"}, {"city", "Settelment"}, {"country", "Country"}, {"device_model", "Device model"}, {"event_count", "Events count"}, {"event_date", "Event date"}, {"instance", "Instance name"}, {"module", "Cloud CRM module title"}, {"os", "Device operation system"}, {"platform", "Platform"}, {"role_name", "User role title"}, {"user_email", "User email"}, {"user_id", "User id"}, {"service", "CRM service title"}, {"user_key", "User unic key"}}),
+				    #"Replaced Value" = Table.ReplaceValue(#"Renamed Columns",".pharmahrm.com","",Replacer.ReplaceText,{"Instance name"}),
+				    #"Renamed Columns1" = Table.RenameColumns(#"Replaced Value",{{"Instance name", "CRM Instance Name"}, {"Application version", "Application Version (Mobile)"}, {"Cloud CRM module title", "CRM Module Name"}, {"CRM service title", "CRM Service Name"}, {"Device operation system", "Operating System"}, {"Events count", "Event Count"}, {"Device model", "Device Model"}, {"Settelment", "City"}, {"User unic key", "User Identifier"}, {"User email", "User Email"}, {"User id", "User ID"}, {"User role title", "User Role"}}),
+				    #"Replaced CRM Service Names" = Table.ReplaceValue(
+				        #"Renamed Columns1",
+				        each [CRM Service Name],
+				        each 
+				            if [CRM Service Name] = "admin-tool" then "Admin Tool"
+				            else if [CRM Service Name] = "cloud-crm" then "Cloud CRM"
+				            else if [CRM Service Name] = "consent-manager" then "Consent Manager"
+				            else if [CRM Service Name] = "cycle-plan" then "Cycle Plan"
+				            else if [CRM Service Name] = "dcr-pr" then "Data Change Request"
+				            else if [CRM Service Name] = "geoforce" then "GeoForce"
+				            else if [CRM Service Name] = "not_identified" then "Not Identified"
+				            else if [CRM Service Name] = "report-power-bi" then "Power BI Reports"
+				            else if [CRM Service Name] = "routes" then "Routes"
+				            else if [CRM Service Name] = "survey" then "Survey"
+				            else [CRM Service Name],
+				        Replacer.ReplaceValue,
+				        {"CRM Service Name"}
+				    ),
+				    #"Replaced CRM Module Names" = Table.ReplaceValue(
+				        #"Replaced CRM Service Names",
+				        each [CRM Module Name],
+				        each 
+				            if [CRM Module Name] = null then "Not Identified"
+				            else if [CRM Module Name] = "clm" then "CLM Presentations"
+				            else if [CRM Module Name] = "company" then "Companies"
+				            else if [CRM Module Name] = "contact" then "Contacts"
+				            else if [CRM Module Name] = "custom_objects" then "Custom Objects"
+				            else if [CRM Module Name] = "expense" then "Expenses"
+				            else if [CRM Module Name] = "finance" then "Finance"
+				            else if [CRM Module Name] = "home" then "Home"
+				            else if [CRM Module Name] = "material-manager" then "Material Manager"
+				            else if [CRM Module Name] = "mir" then "MIR"
+				            else if [CRM Module Name] = "not_identified" then "Not Identified"
+				            else if [CRM Module Name] = "petrol-report" then "Petrol Report"
+				            else if [CRM Module Name] = "reclamation" then "Reclamation"
+				            else if [CRM Module Name] = "report" then "Reports"
+				            else if [CRM Module Name] = "schedule" then "Schedule"
+				            else if [CRM Module Name] = "support-page" then "Support"
+				            else if [CRM Module Name] = "vigilance" then "Vigilance"
+				            else [CRM Module Name],
+				        Replacer.ReplaceValue,
+				        {"CRM Module Name"}
+				    ),
+				    // Приведення типів перед фільтром (джерело CSV віддає всі поля як текст)
+				    #"Changed Type" = Table.TransformColumnTypes(
+				        #"Replaced CRM Module Names",
+				        {
+				            {"Event date", type date},
+				            {"Event Count", Int64.Type}
+				        }
+				    ),
+				    // Відсікання неповного дня (UTC) — event_date рахується в UTC у ClickHouse
+				    #"Filtered Incomplete Day" = Table.SelectRows(
+				        #"Changed Type",
+				        each [Event date] < DateTime.Date(DateTimeZone.RemoveZone(DateTimeZone.FixedUtcNow()))
+				    ),
+				    #"Overridden User Identifier" = Table.RemoveColumns(#"Filtered Incomplete Day", {"User Identifier"}),
+				#"Added User Identifier" = Table.RenameColumns(
+				    Table.DuplicateColumn(#"Overridden User Identifier", "User Email", "User Identifier"),
+				    {}
+				),
+				    #"Sorted Rows" = Table.Sort(#"Added User Identifier",{{"Event date", Order.Descending}})
+				in
+				    #"Sorted Rows"
+				```
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
