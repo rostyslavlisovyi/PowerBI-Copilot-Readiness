@@ -7,8 +7,8 @@
 
 ## D-001 — Synonyms handled via AI instructions, not model synonyms
 The PBI Modeling MCP exposes no synonym write operation. Synonyms are therefore
-delivered through AI instructions in Power BI Service (PBI-072), not written into
-the model. Refs: MS-PREP-04.
+delivered through AI instructions in Power BI Service (PBI-043/PBI-044), not written
+into the model. Refs: MS-PREP-04.
 
 ## D-002 — RLS is out of scope
 Row-level security is intentionally excluded from this rule set. RLS + Copilot must
@@ -36,7 +36,7 @@ docs/context/business-glossary.md (or existing model context), never invented.
 ## D-006 — 200-char front-loading is a Microsoft rule, not an assumption
 Copilot reads only the first 200 chars of a description (MS-COP-03). Front-loading
 business meaning and not restating the name is Microsoft's own recommendation
-(skills-for-fabric). PBI-042 is therefore a hard check, not a soft one.
+(skills-for-fabric). PBI-031 is therefore a hard check, not a soft one.
 
 ## D-007 — Processing unit is one table, with a review gate
 Two phases: assessment scans the whole model once (matrix + relationships.lock +
