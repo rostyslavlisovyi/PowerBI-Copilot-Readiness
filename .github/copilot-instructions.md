@@ -66,7 +66,11 @@ change is diffable in git.
 2. **Snapshot:** ExportTMDL → commit as baseline.
 3. **Audit (READ only):** enumerate tables/columns/measures/relationships/roles;
    for each requirement in `requirements_matrix.md`, detect pass/fail.
-   Output an audit table keyed by `PBI-*`.
+   Output an audit table keyed by `PBI-*`. This includes Manual-lane
+   requirements where the underlying property is readable via MCP even though
+   remediation is manual (e.g. read current `Synonyms` for PBI-027/033) —
+   only mark a requirement `Manual` outright when its evidence genuinely
+   cannot be read via MCP at all (e.g. tenant/capacity settings, PBI-001–009).
 4. **Plan:** list concrete changes (object, property, new value, `PBI-*`, `Source_ID`).
 5. **Apply (WRITE, in transaction, bulk):** use `*_operations` Update with
    `definitions` arrays. Batch by object type.
@@ -92,6 +96,7 @@ IDs below match the current `docs/microsoft/requirements_matrix.md` (PBI-001..05
 | PBI-032 data types, format strings, data categories | column/measure_operations | Update `.formatString`, `.dataCategory` |
 | Display folders (implementation detail of PBI-030/031 organization, no dedicated PBI id) | measure_operations | Update `.displayFolder` |
 | PBI-034 hide technical fields | table/column/measure_operations | Update `.isHidden = true` |
+| PBI-056 spelling errors in visible names/descriptions | table/column/measure_operations | Rename / Update `.description` for clear, unambiguous typos only — flag ambiguous cases for human review instead of auto-correcting |
 | PBI-055 model integrity re-verification | read-only re-query of modified/dependent objects | Confirm relationships, measures, field parameters, sort bindings, security still resolve |
 
 **Not automatable — assessment/report only:**
@@ -118,7 +123,7 @@ IDs match `docs/microsoft/requirements_matrix.md` (PBI-001..055).
 |---|---|
 | PBI-001–009 Prerequisites | Recorded confirmation of tenant/capacity/region/access settings (admin-provided; not detectable via MCP) |
 | PBI-010–021 Modeling & Relationships | Assessment findings and recommendations only — never auto-applied (relationship invariant) |
-| PBI-027 / 033 Synonyms | Proposed synonym list (`docs/manual/{model}/synonyms.md`) — the MCP exposes no synonym write |
+| PBI-027 / 033 Synonyms | Read current `Synonyms` property via MCP first (if exposed for reading), then proposed synonym list (`docs/manual/{model}/synonyms.md`) for anything missing — the MCP exposes no synonym *write* |
 | PBI-035 RLS | Security validation evidence (`docs/manual/{model}/security-validation.md`) — excluded from automation |
 | PBI-036–038 AI data schema (Simplify) | List of fields to include/exclude for Copilot |
 | PBI-039–042 Verified answers | Trigger phrases + intended answer per key question |

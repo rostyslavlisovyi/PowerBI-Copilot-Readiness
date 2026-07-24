@@ -146,6 +146,7 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 | PBI-053 | The Copilot pane is refreshed after changes to AI data schemas or AI instructions | Testing and Validation | MS-PREP-02, MS-PREP-04 | Direct | 🟡 | Pending | Close and reopen the pane before evaluating updated behavior in Power BI Desktop |
 | PBI-054 | Prep Data for AI changes are retested after publication to the Power BI service | Testing and Validation | MS-PREP-01, MS-PREP-02 | Recommended | 🟡 | Pending | Allow configuration changes to propagate before repeating representative tests |
 | PBI-055 | Model integrity is verified after renames or structural changes | Testing and Validation | MS-MODEL-03 | Derived | 🔴 | Pending | Check relationships, RLS, field parameters, sort bindings, expressions, and dependent objects |
+| PBI-056 | Visible table, column, and measure names, and their descriptions, are free of spelling errors | Quality and Consistency | None (Project) | Project | 🟡 | Pending | Added after TASK-001 found a spelling error in a model's own internal naming ("Analitics"); see `DECISIONS.md` D-008 |
 
 ## Requirement Summary
 
@@ -162,21 +163,24 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 | Security | 1 | 0 | 1 | 0 |
 | AI Preparation | 14 | 0 | 14 | 0 |
 | Testing and Validation | 6 | 0 | 6 | 0 |
-| **Total** | **55** | **0** | **55** | **0** |
+| Quality and Consistency | 1 | 0 | 1 | 0 |
+| **Total** | **56** | **0** | **56** | **0** |
 
 ## Evidence Rollup
 
 Evidence verification is derived from the current Source Registry in [`references.md`](references.md#source-registry).
 
 A requirement is counted as verified only when every supporting `Source_ID` has status `Verified`.
+`Project`-level requirements have no `Source_ID` by definition (ADR-0001) — their record of
+origin is a `DECISIONS.md` entry instead, and they are counted as verified on that basis.
 
 | Evidence Level | Total | Verified | Pending Verification |
 |---|---:|---:|---:|
 | Direct | 22 | 22 | 0 |
 | Derived | 3 | 3 | 0 |
 | Recommended | 30 | 30 | 0 |
-| Project | 0 | 0 | 0 |
-| **Total classified requirements** | **55** | **55** | **0** |
+| Project | 1 | 1 | 0 |
+| **Total classified requirements** | **56** | **56** | **0** |
 
 ### Verification Boundary
 
@@ -239,3 +243,4 @@ When this matrix changes:
 | 2026-07-19 | Aligned requirement numbering, source verification, executable-rule mappings, cross-document links, summaries, and evidence rollup | Rostyslav Lisovyi |
 | 2026-07-23 | Fixed `.github/copilot-instructions.md` and `DECISIONS.md` to use current PBI-001..055 ids instead of rejected historical ids (PBI-060/065/070/072/074/080-082); removed an incorrect claim that relationships are MCP-automatable (they are a protected invariant); created missing `docs/microsoft/review_notes.md`; fixed `PROJECT.md` file-name reference | Claude (repository engineer skill) |
 | 2026-07-24 | Verified 14 previously-`Planned` sources against Microsoft Learn (real URLs added); 12 moved to `Verified`, 2 (`MS-MODEL-11`, `MS-MODEL-12`) moved to `Reviewed` with open applicability questions logged in `review_notes.md`; Evidence Rollup now shows 55/55 requirements with verified evidence; corroborated the existence of the official Power BI Modeling MCP server (github.com/microsoft/powerbi-modeling-mcp) referenced by `.github/copilot-instructions.md` | Claude (repository engineer skill) |
+| 2026-07-24 | Reverted TASK-001's baseline+audit merge for `user-usage-analytics` (PR #4) to re-run it with two audit-quality fixes applied first. Added `PBI-056` (spelling check on visible names/descriptions), the first `Project`-evidence-level requirement — see `DECISIONS.md` D-008. Updated `rules.yaml` PBI-027/033 to require reading the current `Synonyms` state via MCP before drafting proposals, rather than assuming a blank slate. Requirement Summary and Evidence Rollup now cover 56 requirements | Claude (repository engineer skill) |

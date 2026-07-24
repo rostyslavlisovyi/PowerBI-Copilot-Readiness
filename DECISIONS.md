@@ -42,3 +42,24 @@ business meaning and not restating the name is Microsoft's own recommendation
 Two phases: assessment scans the whole model once (matrix + relationships.lock +
 queue); iteration processes ONE table at a time and stops for review before the
 next. Queue is ordered by simplicity (easiest first) for the trial stage.
+
+## D-008 — Spelling check added as PBI-056 (Project evidence, no Microsoft source)
+TASK-001's first real run against `user-usage-analytics` surfaced a spelling error
+in the model's own internal connection name ("Analitics"). No Microsoft source
+requires a spelling check, so this is added as the project's first `Project`
+evidence-level requirement (ADR-0001) rather than attributed to a `Source_ID`.
+Scope: visible table/column/measure names and their descriptions, checked in the
+report's display language. Remediation reuses the existing rename/description-
+update automatable operations already defined for PBI-022–031; PBI-056 only adds
+a detection step, not a new MCP operation.
+
+## D-009 — Manual-lane items are still read via MCP where the property is readable
+PBI-027/033 (synonyms) were being marked `Manual` in audits without checking
+whether synonyms already exist in the model — the MCP has no *write* operation
+for synonyms, but reading the `Synonyms` property is a separate capability.
+`rules.yaml` now requires reading current state first for both, so audit status
+reflects the model's real content instead of assuming nothing exists. This is a
+general principle, not specific to synonyms: a requirement is only marked
+`Manual` outright when its evidence cannot be read via MCP at all (e.g.
+tenant/capacity settings, PBI-001–009), not merely because remediation requires
+a human step.

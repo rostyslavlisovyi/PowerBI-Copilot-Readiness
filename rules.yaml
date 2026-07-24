@@ -4,10 +4,10 @@
 #   docs/microsoft/requirements_matrix.md
 #
 # Requirement identifiers must match the current matrix:
-#   PBI-001 through PBI-055
+#   PBI-001 through PBI-056
 # ============================================================
 
-version: "1.1"
+version: "1.2"
 project: PowerBI-Copilot-Readiness
 
 source_matrix: docs/microsoft/requirements_matrix.md
@@ -22,7 +22,7 @@ config:
 
   requirement_id_pattern: "^PBI-[0-9]{3}$"
   minimum_requirement_id: PBI-001
-  maximum_requirement_id: PBI-055
+  maximum_requirement_id: PBI-056
 
   ordering:
     strategy: simplicity
@@ -690,6 +690,14 @@ rules:
 
     detect: identify technical object names that cannot safely be renamed
 
+    read_existing_state: >-
+      Before drafting any proposal, read the current `Synonyms` property (if
+      the connected MCP version exposes it for reading) for every in-scope
+      table, column, and measure. Do not propose a synonym that already
+      exists; record existing synonyms in the audit output so PBI-027 status
+      (Met/Not Met) reflects the model's real current state, not an assumed
+      blank slate.
+
     automated_action: >-
       Add an approved business description when supported by available context.
 
@@ -880,6 +888,14 @@ rules:
     detect: >-
       Compare important table and field names with terms in the business
       glossary and representative natural-language questions.
+
+    read_existing_state: >-
+      Before comparing against the business glossary, read the current
+      `Synonyms` property (if the connected MCP version exposes it for
+      reading) for every in-scope table and field. Do not propose a synonym
+      that already exists; record existing synonyms in the audit output so
+      PBI-033 status (Met/Not Met) reflects the model's real current state,
+      not an assumed blank slate.
 
     manual_action: >-
       Produce a synonym proposal for manual application when the MCP
@@ -1300,6 +1316,42 @@ rules:
         - fail_model
         - escalate
 
+  - id: PBI-056
+    requirement: >-
+      Visible table, column, and measure names, and their descriptions, are
+      free of spelling errors in the report's display language
+    source_id: []
+    evidence_note: >-
+      Project evidence level (ADR-0001) — no Microsoft source. Origin recorded
+      in DECISIONS.md D-008, not a Source_ID.
+    category: Quality and Consistency
+    phase: iteration
+    severity: recommended
+    automatable: true
+    scope:
+      - table
+      - column
+      - measure
+
+    detect: >-
+      Spell-check every visible (non-hidden) table name, column name, measure
+      name, and description text against the model's display language.
+      Flag likely typos (e.g. transposed/missing letters producing a
+      non-dictionary word close to a real one), not intentional domain terms,
+      abbreviations already recorded in docs/context/business-glossary.md, or
+      proper nouns.
+
+    fix: >-
+      Correct only clear, unambiguous spelling errors using the same rename /
+      description-update operations already used for PBI-022–PBI-031. Do not
+      "fix" ambiguous or intentional-looking terms — flag those for human
+      review instead of auto-correcting.
+
+    verify: >-
+      The corrected name or description reads as a valid word/phrase in the
+      display language and all dependent expressions and relationships remain
+      valid (same check as PBI-055).
+
 # ------------------------------------------------------------
 # MANUAL LANE OUTPUTS
 # ------------------------------------------------------------
@@ -1411,7 +1463,7 @@ excluded_automation:
 
 validation:
   requirement_ids:
-    allowed_range: PBI-001..PBI-055
+    allowed_range: PBI-001..PBI-056
     require_zero_padding: true
     reject_letter_suffixes: true
     reject_unknown_ids: true
@@ -1450,7 +1502,7 @@ validation:
 # ------------------------------------------------------------
 
 run_log:
-  path: docs/runs/{model}-{date}.md
+  path: docs/runs/{model}/{date}.md
 
   required_fields:
     - model
@@ -1465,4 +1517,5 @@ run_log:
     - relationship_integrity_result
     - manual_items
     - unresolved_conflicts
+    - token_usage_estimate
     - final_status
