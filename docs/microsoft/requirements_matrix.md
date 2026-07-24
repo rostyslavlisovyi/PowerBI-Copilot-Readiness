@@ -77,11 +77,11 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 
 | ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
 |---|---|---|---|---|---|---|---|
-| PBI-022 | Use human-readable names for tables, columns, and measures | Naming | MS-NAME-01 | Recommended | 🟡 | Pending | Renames require approved business context and dependency validation |
-| PBI-023 | Use consistent naming conventions throughout the semantic model | Naming | MS-NAME-01 | Recommended | 🟡 | Pending | Review capitalization, spacing, pluralization, and terminology consistently |
-| PBI-024 | Avoid excessive acronyms, abbreviations, and punctuation in object names | Naming | MS-NAME-01 | Recommended | 🟡 | Pending | Retain established acronyms only when they are understood by intended users |
-| PBI-025 | Use business-friendly names that reflect how users naturally refer to the data | Naming | MS-NAME-02 | Recommended | 🟡 | Pending | Use approved terminology from the business glossary or other validated context |
-| PBI-026 | Provide descriptions to distinguish similarly named fields when renaming is insufficient | Naming | MS-NAME-01 | Recommended | 🟡 | Pending | Include differences in meaning, grain, unit, or intended use |
+| PBI-022 | Use human-readable names for tables, columns, and measures | Naming | MS-NAME-01 | Recommended | 🟡 | Met | TASK-002 applied approved naming scope; one approved rename (_Measures -> Measures) was skipped due reserved engine name restriction and documented in run notes |
+| PBI-023 | Use consistent naming conventions throughout the semantic model | Naming | MS-NAME-01 | Recommended | 🟡 | Met | TASK-002 applied approved naming scope and verified post-apply consistency for changed objects |
+| PBI-024 | Avoid excessive acronyms, abbreviations, and punctuation in object names | Naming | MS-NAME-01 | Recommended | 🟡 | Met | TASK-002 removed approved technical punctuation-style naming in scope and verified the resulting renamed field |
+| PBI-025 | Use business-friendly names that reflect how users naturally refer to the data | Naming | MS-NAME-02 | Recommended | 🟡 | Met | TASK-002 applied approved business-facing rename in scope and verified dependent references resolved |
+| PBI-026 | Provide descriptions to distinguish similarly named fields when renaming is insufficient | Naming | MS-NAME-01 | Recommended | 🟡 | Met | TASK-002 added the approved disambiguating descriptions to key identity fields |
 | PBI-027 | Add descriptions and synonyms when technical object names cannot be changed | Naming | MS-NAME-02 | Recommended | 🟡 | Pending | Synonyms may require manual application when the MCP does not support writes |
 | PBI-028 | Name measures in English to improve Copilot understanding | Naming | MS-NAME-01 | Recommended | 🟡 | Pending | Rename only when an approved English business term is available |
 
@@ -90,14 +90,14 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 | ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
 |---|---|---|---|---|---|---|---|
 | PBI-029 | Review Copilot-generated measure descriptions before publishing the semantic model | Measures | MS-MEASURE-01 | Recommended | 🟡 | Pending | Human review must confirm meaning, calculation interpretation, units, and usage |
-| PBI-030 | Every visible measure has an accurate, concise, and helpful description | Measures | MS-MEASURE-01 | Recommended | 🟡 | Pending | Descriptions must use validated business context and must not merely repeat the measure name |
+| PBI-030 | Every visible measure has an accurate, concise, and helpful description | Measures | MS-MEASURE-01 | Recommended | 🟡 | Met | TASK-002 added descriptions to all approved missing visible measures and verified post-apply state |
 
 ## Metadata and Descriptions
 
 | ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
 |---|---|---|---|---|---|---|---|
-| PBI-031 | Add accurate, concise, and helpful descriptions to visible tables and business-relevant columns | Metadata and Descriptions | MS-META-01 | Recommended | 🟡 | Pending | Front-load useful business meaning as implementation guidance; do not treat a character target as a separate requirement |
-| PBI-032 | Configure data types, format strings, and data categories accurately for fields exposed to Copilot | Metadata and Descriptions | MS-META-01 | Derived | 🟡 | Pending | Validate dependent calculations when changing data types or formatting metadata |
+| PBI-031 | Add accurate, concise, and helpful descriptions to visible tables and business-relevant columns | Metadata and Descriptions | MS-META-01 | Recommended | 🟡 | Met | TASK-002 added approved descriptions for 24 in-scope visible business columns |
+| PBI-032 | Configure data types, format strings, and data categories accurately for fields exposed to Copilot | Metadata and Descriptions | MS-META-01 | Derived | 🟡 | Met | TASK-002 set approved Country/City data categories for all four in-scope geographic fields |
 
 ## Discoverability
 
@@ -109,7 +109,7 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 
 | ID | Requirement | Category | Source_ID | Evidence Level | Priority | Status | Notes |
 |---|---|---|---|---|---|---|---|
-| PBI-034 | Hide technical columns and measures that are not intended for report consumers or Copilot interactions | Hidden and Technical Fields | MS-HIDDEN-01 | Recommended | 🟡 | Pending | Preserve relationships, sort bindings, and dependent calculations when hiding objects |
+| PBI-034 | Hide technical columns and measures that are not intended for report consumers or Copilot interactions | Hidden and Technical Fields | MS-HIDDEN-01 | Recommended | 🟡 | Met | TASK-002 applied the single approved hide action (Session Count) and verified no additional hides were introduced |
 
 ## Security
 
@@ -145,7 +145,7 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 | PBI-052 | AI instructions are tested against representative business-language questions | Testing and Validation | MS-PREP-04 | Direct | 🔴 | Pending | Confirm that terminology and interpretation rules affect responses as intended |
 | PBI-053 | The Copilot pane is refreshed after changes to AI data schemas or AI instructions | Testing and Validation | MS-PREP-02, MS-PREP-04 | Direct | 🟡 | Pending | Close and reopen the pane before evaluating updated behavior in Power BI Desktop |
 | PBI-054 | Prep Data for AI changes are retested after publication to the Power BI service | Testing and Validation | MS-PREP-01, MS-PREP-02 | Recommended | 🟡 | Pending | Allow configuration changes to propagate before repeating representative tests |
-| PBI-055 | Model integrity is verified after renames or structural changes | Testing and Validation | MS-MODEL-03 | Derived | 🔴 | Pending | Check relationships, RLS, field parameters, sort bindings, expressions, and dependent objects |
+| PBI-055 | Model integrity is verified after renames or structural changes | Testing and Validation | MS-MODEL-03 | Derived | 🔴 | Met | TASK-002 re-verified all modified objects plus relationships and security invariants before commit |
 | PBI-056 | Visible table, column, and measure names, and their descriptions, are free of spelling errors | Quality and Consistency | None (Project) | Project | 🟡 | Pending | Added after TASK-001 found a spelling error in a model's own internal naming ("Analitics"); see `DECISIONS.md` D-008 |
 
 ## Requirement Summary
@@ -155,16 +155,16 @@ Columns: **ID · Requirement · Category · Source_ID · Evidence Level · Prior
 | Prerequisites | 9 | 0 | 9 | 0 |
 | Modeling and Schema | 5 | 0 | 5 | 0 |
 | Relationships | 7 | 0 | 7 | 0 |
-| Naming | 7 | 0 | 7 | 0 |
-| Measures | 2 | 0 | 2 | 0 |
-| Metadata and Descriptions | 2 | 0 | 2 | 0 |
+| Naming | 7 | 5 | 2 | 0 |
+| Measures | 2 | 1 | 1 | 0 |
+| Metadata and Descriptions | 2 | 2 | 0 | 0 |
 | Discoverability | 1 | 0 | 1 | 0 |
-| Hidden and Technical Fields | 1 | 0 | 1 | 0 |
+| Hidden and Technical Fields | 1 | 1 | 0 | 0 |
 | Security | 1 | 0 | 1 | 0 |
 | AI Preparation | 14 | 0 | 14 | 0 |
-| Testing and Validation | 6 | 0 | 6 | 0 |
+| Testing and Validation | 6 | 1 | 5 | 0 |
 | Quality and Consistency | 1 | 0 | 1 | 0 |
-| **Total** | **56** | **0** | **56** | **0** |
+| **Total** | **56** | **10** | **46** | **0** |
 
 ## Evidence Rollup
 
@@ -244,3 +244,4 @@ When this matrix changes:
 | 2026-07-23 | Fixed `.github/copilot-instructions.md` and `DECISIONS.md` to use current PBI-001..055 ids instead of rejected historical ids (PBI-060/065/070/072/074/080-082); removed an incorrect claim that relationships are MCP-automatable (they are a protected invariant); created missing `docs/microsoft/review_notes.md`; fixed `PROJECT.md` file-name reference | Claude (repository engineer skill) |
 | 2026-07-24 | Verified 14 previously-`Planned` sources against Microsoft Learn (real URLs added); 12 moved to `Verified`, 2 (`MS-MODEL-11`, `MS-MODEL-12`) moved to `Reviewed` with open applicability questions logged in `review_notes.md`; Evidence Rollup now shows 55/55 requirements with verified evidence; corroborated the existence of the official Power BI Modeling MCP server (github.com/microsoft/powerbi-modeling-mcp) referenced by `.github/copilot-instructions.md` | Claude (repository engineer skill) |
 | 2026-07-24 | Reverted TASK-001's baseline+audit merge for `user-usage-analytics` (PR #4) to re-run it with two audit-quality fixes applied first. Added `PBI-056` (spelling check on visible names/descriptions), the first `Project`-evidence-level requirement — see `DECISIONS.md` D-008. Updated `rules.yaml` PBI-027/033 to require reading the current `Synonyms` state via MCP before drafting proposals, rather than assuming a blank slate. Requirement Summary and Evidence Rollup now cover 56 requirements | Claude (repository engineer skill) |
+| 2026-07-24 | Applied TASK-002 approved automatable scope for `user-usage-analytics` and updated implementation statuses to `Met` for PBI-022, 023, 024, 025, 026, 030, 031, 032, 034, and 055; recalculated Requirement Summary totals | GitHub Copilot (GPT-5.3-Codex) + Power BI Modeling MCP |

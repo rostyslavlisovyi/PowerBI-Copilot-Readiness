@@ -1,0 +1,122 @@
+/// Contains deployment records for the web Description
+/// Reference table that maps each CRM client instance to its corresponding Power BI embedded dashboard ID and name. Contains one row per instance-dashboard combination. Used to analyze Power BI dashboard visit statistics and monitor embedded report adoption across client deployments. Source data is refreshed automatically via the data pipeline.
+table 'Power BI Report Mapping'
+	lineageTag: 2a9b63f3-0139-4d09-a560-46c6c95a815f
+
+	/// The unique identifier (slug) of the CRM client instance. Used as the relationship key to PostHog Application Usage Events and Web App Deployments tables. Each value represents a separate client CRM deployment.
+	column 'CRM Instance Name'
+		dataType: string
+		displayFolder: Report Info
+		lineageTag: 595c32e4-6441-4490-9cb7-a61fb9213a6b
+		summarizeBy: none
+		sourceColumn: CRM Instance Name
+
+		annotation SummarizationSetBy = Automatic
+
+	/// The name of the Power BI embedded report assigned to the client instance. Use this field to filter or group report visit statistics by report type.
+	column 'Report Name'
+		dataType: string
+		displayFolder: Report Info
+		lineageTag: f16b245f-c999-4082-933e-1eb484424c3c
+		summarizeBy: none
+		sourceColumn: Report Name
+
+		annotation SummarizationSetBy = Automatic
+
+	/// The unique numeric identifier of the Power BI embedded report assigned to the client instance. Used to link report visit events to specific client deployments. Multiple instances may share the same report ID.
+	column 'Report ID'
+		dataType: int64
+		formatString: 0
+		displayFolder: Report Info
+		lineageTag: d98379a4-fc38-4e24-828f-607fc27b5b94
+		summarizeBy: count
+		sourceColumn: Report ID
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Workspace GUID that identifies the Power BI workspace where the mapped embedded report is hosted.
+	column 'Workspace ID'
+		dataType: string
+		displayFolder: Report Info
+		lineageTag: adf0ce9e-6a8d-475c-9eb3-6a11a0306be9
+		summarizeBy: none
+		sourceColumn: Workspace ID
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Report GUID that uniquely identifies the embedded Power BI report mapped to the client instance.
+	column 'Power BI Report ID'
+		dataType: string
+		displayFolder: Report Info
+		lineageTag: 2bdc8855-afcd-41a5-9888-77b5ddd905f7
+		summarizeBy: none
+		sourceColumn: Power BI Report ID
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Composite technical key linking a client instance to a specific report mapping record.
+	column 'Instance Report Key'
+		dataType: string
+		lineageTag: fbeb2976-b435-44fa-ae7c-1fd52ca3a9fa
+		summarizeBy: none
+		sourceColumn: Instance Report Key
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Power BI Report Mapping' = m
+		mode: import
+		source =
+				let
+				    Source = AzureStorage.Blobs("https://pbecrmde.blob.core.windows.net/crm/"),
+				    #"Imported File" = Source{[
+				        #"Folder Path" = "https://pbecrmde.blob.core.windows.net/crm/",
+				        Name = "243719954656925104/report.csv"
+				    ]}[Content],
+				    #"Imported CSV" = Csv.Document(
+				        #"Imported File",
+				        [Delimiter=";", Encoding=65001, QuoteStyle=QuoteStyle.None]
+				    ),
+				    #"Promoted Headers" = Table.PromoteHeaders(
+				        #"Imported CSV",
+				        [PromoteAllScalars=true]
+				    ),
+				
+				    // Крок 1 — Зміна типів
+				    // Power BI Report ID = GUID → type text!
+				    #"Changed Type" = Table.TransformColumnTypes(
+				        #"Promoted Headers",
+				        {
+				            {"instance_name", type text},
+				            {"dashboard_name", type text},
+				            {"dashboard_id", Int64.Type},
+				            {"reportid", type text},      // ← GUID, не число!
+				            {"workspaceid", type text}
+				        }
+				    ),
+				
+				    // Крок 2 — Перейменування
+				    #"Renamed Columns" = Table.RenameColumns(
+				        #"Changed Type",
+				        {
+				            {"instance_name", "CRM Instance Name"},
+				            {"dashboard_name", "Report Name"},
+				            {"dashboard_id", "Report ID"},
+				            {"reportid", "Power BI Report ID"},
+				            {"workspaceid", "Workspace ID"}
+				        }
+				    ),
+				
+				    // Крок 3 — Composite key
+				    #"Added Instance Report Key" = Table.AddColumn(
+				        #"Renamed Columns",
+				        "Instance Report Key",
+				        each [CRM Instance Name] & "_" & Text.From([Report ID])
+				    )
+				
+				in
+				    #"Added Instance Report Key"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

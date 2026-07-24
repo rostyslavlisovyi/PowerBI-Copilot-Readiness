@@ -1,0 +1,57 @@
+relationship 629e52e1-00a1-455d-94b5-c579a4f0f18d
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'Data Refresh Status'.GetCurrentDateTime
+	toColumn: LocalDateTable_a84b3409-4c6e-47a4-a2ff-e8b6f2726615.Date
+
+relationship eb5f5d29-f021-45f3-80c8-23282c23bd33
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'Web App Deployments'.'Latest Deployment Date'
+	toColumn: LocalDateTable_cf2b5915-6af8-4cf7-9b9e-55e1beed0726.Date
+
+relationship 3f897984-1859-0e18-6755-a86a0ecf0f09
+	fromColumn: 'PostHog Application Usage Events'.'CRM Instance Name'
+	toColumn: 'Web App Deployments'.'CRM Instance Name'
+
+relationship 012a498b-3563-d60e-ef26-08af0e5230e8
+	crossFilteringBehavior: bothDirections
+	fromColumn: 'PostHog Application Usage Events'.'Event date'
+	toColumn: Calendar.Date
+
+relationship 65cdcc73-e7d2-4b6e-9c6f-91d41b836eef
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'Data Refresh Status'.'Last Refresh Date'
+	toColumn: LocalDateTable_73cbcdb8-60a9-4faa-92fb-beb286760bad.Date
+
+relationship c1e0b318-fa69-4a93-bff3-ac933c8d7e8b
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'Data Refresh Status'.'Next Refresh Date'
+	toColumn: LocalDateTable_d0d47e85-ce06-469c-b3c6-210fab3eb9db.Date
+
+relationship 6ce2cf3f-c8fc-37cf-f594-2c879b6b9e00
+	fromColumn: 'PostHog Application Usage Events'.'CRM Module Name'
+	toColumn: 'CRM Modules'.'CRM Module Name'
+
+relationship 9aa97db1-d2fe-837c-cc06-69ece84d82a7
+	fromColumn: 'PostHog Application Usage Events'.'CRM Service Name'
+	toColumn: 'CRM Services'.'CRM Service Name'
+
+relationship 75f983f3-95e2-41b9-a89b-b704d77cedc6
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'CRM Application Deployments'.'Latest Deployment Date'
+	toColumn: LocalDateTable_a516a5a2-c968-4253-9bc0-8025b060ed61.Date
+
+relationship aa41e6a7-133a-672a-172b-2d9fd4a11c91
+	fromColumn: 'PostHog Power BI Usage Events'.'Instance Report Key'
+	toColumn: 'Power BI Report Mapping'.'Instance Report Key'
+
+relationship 96aea585-327a-231f-c952-5f22aeb3ab60
+	crossFilteringBehavior: bothDirections
+	fromColumn: 'Power BI Report Mapping'.'Power BI Report ID'
+	toColumn: 'Power BI Report Catalog'.'Report ID'
+
+relationship 2f2fb45d-70b5-6a04-4c27-95e464f5a181
+	crossFilteringBehavior: bothDirections
+	securityFilteringBehavior: bothDirections
+	fromColumn: 'PostHog Power BI Usage Events'.'Event Date'
+	toColumn: Calendar.Date
+
